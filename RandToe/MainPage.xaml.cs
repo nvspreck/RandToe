@@ -33,5 +33,10 @@ namespace RandToe
         {
             this.Frame.Navigate(typeof(NetworkGameSetup));
         }
+
+        private void PlayLocal_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(GamePage));
+        }
     }
 }

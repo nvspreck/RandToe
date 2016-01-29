@@ -20,7 +20,7 @@
             <Button Width="200"
                     Margin="24"
                     HorizontalAlignment="Center"
-                    Click="PlayNetwork_Click"
+                    Click="PlayLocal_Click"
                     Content="Play Local" />
         </StackPanel>
     </Grid>

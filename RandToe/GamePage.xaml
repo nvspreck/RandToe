@@ -7,7 +7,16 @@
       mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Grid Width="300" Height="300">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+
+        <TextBlock x:Name="ui_readyPlayerText" Margin="12"/>
+
+
+        <Grid Margin="12" x:Name="ui_mainGrid" SizeChanged="MainGrid_SizeChanged" Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
@@ -141,7 +150,7 @@
                 </Grid>
             </Grid>
 
-            <Grid Grid.Row="0" Grid.Column="1">
+            <Grid Grid.Row="0" Grid.Column="1" Background="#220000FF">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
@@ -385,7 +394,7 @@
                 </Grid>
             </Grid>
 
-            <Grid Grid.Row="1" Grid.Column="0">
+            <Grid Grid.Row="1" Grid.Column="0" Background="#220000FF">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
@@ -629,7 +638,7 @@
                 </Grid>
             </Grid>
 
-            <Grid Grid.Row="1" Grid.Column="2">
+            <Grid Grid.Row="1" Grid.Column="2" Background="#220000FF">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
@@ -873,7 +882,7 @@
                 </Grid>
             </Grid>
 
-            <Grid Grid.Row="2" Grid.Column="1">
+            <Grid Grid.Row="2" Grid.Column="1" Background="#220000FF">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />

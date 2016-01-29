@@ -91,10 +91,18 @@ namespace RandToeEngine.CommonObjects
 
             // Set the slots
             Slots = new int[9][];
-            for(int row = 0; row < 9; row++)
+            int count = 0;       
+            for(int y = 0; y < 9; y++)
             {
-                Slots[row] = new int[9];
-                Array.ConstrainedCopy(fields, row * 9, Slots[row], 0, 9);
+                for(int x = 0; x < 9; x++)
+                {
+                    if(Slots[x] == null)
+                    {
+                        Slots[x] = new int[9];
+                    }
+                    Slots[x][y] = fields[count];
+                    count++;
+                }
             }
         }
 
