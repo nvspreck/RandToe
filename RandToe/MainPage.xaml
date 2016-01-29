@@ -1,0 +1,27 @@
+﻿<Page x:Class="RandToe.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="using:RandToe"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Margin="24"
+                       HorizontalAlignment="Center"
+                       FontSize="24"
+                       Text="RandToe" />
+            <Button Width="200"
+                    Margin="24"
+                    HorizontalAlignment="Center"
+                    Click="PlayNetwork_Click"
+                    Content="Play Network" />
+            <Button Width="200"
+                    Margin="24"
+                    HorizontalAlignment="Center"
+                    Click="PlayNetwork_Click"
+                    Content="Play Local" />
+        </StackPanel>
+    </Grid>
+</Page>
