@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RandToeEngine.Interfaces
 {
-    public interface IGameEngine
+    public interface IPlayerBase
     {
         /// <summary>
         /// How much max time is remaining.
@@ -47,7 +47,7 @@ namespace RandToeEngine.Interfaces
         /// <summary>
         /// The current board.
         /// </summary>
-        UltimateTicTacToeBoard CurrentBoard { get; }
+        MacroBoard CurrentBoard { get; }
 
         /// <summary>
         /// Returns a list of the past moves.
@@ -57,9 +57,7 @@ namespace RandToeEngine.Interfaces
         /// <summary>
         /// Called when we should make a move.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
         /// <returns>true if the move has been made, false if it is invalid.</returns>
-        bool MakeMove(int x, int y);
+        bool MakeMove(PlayerMove move);
     }
 }

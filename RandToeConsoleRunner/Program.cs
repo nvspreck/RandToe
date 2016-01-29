@@ -39,33 +39,33 @@ namespace RandToeConsoleRunner
             TextReader consoleReader = Console.In;
 
             // Sub to the logger
-            RandToeEngineCore.Logger.OnLogMessage += Logger_OnLogMessage;
+            PlayerBase.Logger.OnLogMessage += Logger_OnLogMessage;
 
-            RandToeEngineCore.Logger.Log(this, "Creating Engine");
+            PlayerBase.Logger.Log(this, "Creating Engine");
 
             // Make the engine.
-            RandToeEngineCore engine = new RandToeEngineCore(this, null);
+            PlayerBase engine = new PlayerBase(this, null);
 
-            RandToeEngineCore.Logger.Log(this, "Engine Created; Entering main loop");
+            PlayerBase.Logger.Log(this, "Engine Created; Entering main loop");
 
             // The main loop
             while(true)
             {
                 try
                 {
-                    RandToeEngineCore.Logger.Log(this, "Waiting for command");
+                    PlayerBase.Logger.Log(this, "Waiting for command");
 
                     // Read a new line.
                     string newCommand = consoleReader.ReadLine();
 
-                    RandToeEngineCore.Logger.Log(this, $"Command Received: {newCommand}");
+                    PlayerBase.Logger.Log(this, $"Command Received: {newCommand}");
 
                     // Send the command to the engine
                     engine.OnCommandRecieved(newCommand);
                 }
                 catch(Exception ex)
                 {
-                    RandToeEngineCore.Logger.Log(this, "Exception in main logic loop!", ex);
+                    PlayerBase.Logger.Log(this, "Exception in main logic loop!", ex);
                 }
             }
         }
@@ -85,7 +85,7 @@ namespace RandToeConsoleRunner
             }
             else
             {
-                RandToeEngineCore.Logger.Log(this, $"OnMakeMoveCommand was called but we didn't have an output!", LogLevels.Error);
+                PlayerBase.Logger.Log(this, $"OnMakeMoveCommand was called but we didn't have an output!", LogLevels.Error);
             }
         }
 
