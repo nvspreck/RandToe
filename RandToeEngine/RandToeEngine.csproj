@@ -39,9 +39,10 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bots\MasterMind.cs" />
     <Compile Include="CommonObjects\MicroBoard.cs" />
     <Compile Include="CommonObjects\PlayerMove.cs" />
-    <Compile Include="CommonObjects\UltimateTicTacToeBoard.cs" />
+    <Compile Include="CommonObjects\MacroBoard.cs" />
     <Compile Include="Interfaces\ICommandConsumer.cs" />
     <Compile Include="Interfaces\IMoveCommandConsumer.cs" />
     <Compile Include="Interfaces\IGameEngine.cs" />

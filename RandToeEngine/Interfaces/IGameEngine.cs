@@ -47,7 +47,7 @@ namespace RandToeEngine.Interfaces
         /// <summary>
         /// The current board.
         /// </summary>
-        UltimateTicTacToeBoard CurrentBoard { get; }
+        MacroBoard CurrentBoard { get; }
 
         /// <summary>
         /// Returns a list of the past moves.

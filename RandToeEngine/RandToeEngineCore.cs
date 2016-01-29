@@ -191,7 +191,7 @@ namespace RandToeEngine
                     break;
                 case "field":
                     // Parse the value
-                    int[] fieldArray = ParseBoardIntArray(commandParts[3], 81);
+                    sbyte[] fieldArray = ParseBoardByteArray(commandParts[3], 81);
                     if(fieldArray != null)
                     {
                         SetNewBoardValue(fieldArray, null);
@@ -199,7 +199,7 @@ namespace RandToeEngine
                     break;
                 case "macroboard":
                     // Parse the value
-                    int[] macroArray = ParseBoardIntArray(commandParts[3], 9);
+                    sbyte[] macroArray = ParseBoardByteArray(commandParts[3], 9);
                     if (macroArray != null)
                     {
                         SetNewBoardValue(null, macroArray);
@@ -212,20 +212,20 @@ namespace RandToeEngine
         }
 
         /// <summary>
-        /// Parses an int array.
+        /// Parses an byte array.
         /// </summary>
         /// <param name="intArrayString"></param>
         /// <param name="expectedCount"></param>
         /// <returns></returns>
-        private int[] ParseBoardIntArray(string intArrayString, int expectedCount)
+        private sbyte[] ParseBoardByteArray(string intArrayString, int expectedCount)
         {
             // Parse the value
-            int[] intArray = new int[expectedCount];
+            sbyte[] intArray = new sbyte[expectedCount];
             string[] fieldStringArray = intArrayString.Split(',');
             int count = 0;
             foreach (string field in fieldStringArray)
             {
-                if (!int.TryParse(fieldStringArray[count], out intArray[count]))
+                if (!sbyte.TryParse(fieldStringArray[count], out intArray[count]))
                 {
                     Logger.Log(this, $"Failed to parse int array pos:({count}) string:({intArrayString})", LogLevels.Error);
                 }
@@ -247,7 +247,7 @@ namespace RandToeEngine
         /// </summary>
         /// <param name="fieldArray"></param>
         /// <param name="macroBoard"></param>
-        private void SetNewBoardValue(int[] fieldArray, int[] macroBoard)
+        private void SetNewBoardValue(sbyte[] fieldArray, sbyte[] macroBoard)
         {
             // If we have a field set
             if(fieldArray != null)
@@ -259,7 +259,7 @@ namespace RandToeEngine
                 }
 
                 // Make a new board
-                CurrentBoard = UltimateTicTacToeBoard.CreateNewBoard(CurrentRound, fieldArray);
+                CurrentBoard = MacroBoard.CreateNewBoard(CurrentRound, fieldArray);
             }
 
             // If we have a macro board set it.
@@ -277,7 +277,7 @@ namespace RandToeEngine
                 }
 
                 // Set the values
-                UltimateTicTacToeBoard.AddMacroboardData(CurrentBoard, macroBoard);
+                MacroBoard.AddMacroboardData(CurrentBoard, macroBoard);
             }
         }
 
@@ -326,7 +326,7 @@ namespace RandToeEngine
         /// <summary>
         /// The current game board.
         /// </summary>
-        public UltimateTicTacToeBoard CurrentBoard { get; private set; }
+        public MacroBoard CurrentBoard { get; private set; }
 
         /// <summary>
         /// The number of the current move

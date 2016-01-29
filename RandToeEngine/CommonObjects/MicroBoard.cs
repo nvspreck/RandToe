@@ -8,7 +8,7 @@ namespace RandToeEngine.CommonObjects
 {
     public class MicroBoard
     {
-        UltimateTicTacToeBoard m_macroBoard;
+        MacroBoard m_macroBoard;
 
         #region Creation
 
@@ -19,13 +19,13 @@ namespace RandToeEngine.CommonObjects
         /// <param name="row"></param>
         /// <param name="col"></param>
         /// <returns></returns>
-        public static MicroBoard CreateBoard(UltimateTicTacToeBoard macroBoard, int row, int col)
+        public static MicroBoard CreateBoard(MacroBoard macroBoard, int row, int col)
         {
             MicroBoard board = new MicroBoard(macroBoard, row, col);
             return board;
         }
 
-        private MicroBoard(UltimateTicTacToeBoard macroBoard, int row, int col)
+        private MicroBoard(MacroBoard macroBoard, int row, int col)
         { }
 
         #endregion

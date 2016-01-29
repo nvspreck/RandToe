@@ -17,6 +17,7 @@ using RandToeEngine;
 using RandToeEngine.Interfaces;
 using System.Threading.Tasks;
 using Windows.UI.Core;
+using RandToeEngine.Bots;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -81,11 +82,14 @@ namespace RandToe
                 m_player2 = new PlayerContext();
                 m_player2.PlayerNumber = 2;
                 m_player2.Callback = UpdateGameState;
-                m_player2.Engine = new RandToeEngineCore(null, m_player2);
+                m_player2.Engine = new RandToeEngineCore(null, new MasterMind());
 
-                m_player1.Engine.OnCommandRecieved("update game field 0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
-                m_player1.Engine.OnCommandRecieved("update game macroboard -1,0,0,0,0,0,0,0,0");
-                m_player1.Engine.OnCommandRecieved("action move 1000");
+                Task.Run(() =>
+                {
+                    m_player2.Engine.OnCommandRecieved("update game field 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+                    m_player2.Engine.OnCommandRecieved("update game macroboard 0,0,0,0,-1,0,0,0,0");
+                    m_player2.Engine.OnCommandRecieved("action move 1000");
+                });
             }
         }
 
