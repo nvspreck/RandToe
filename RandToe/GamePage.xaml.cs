@@ -52,6 +52,7 @@ namespace RandToe
         public GamePage()
         {
             this.InitializeComponent();
+            RandToeEngineCore.Logger.OnLogMessage += Logger_OnLogMessage;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs args)
@@ -109,8 +110,6 @@ namespace RandToe
                         TextBlock textBlock = (TextBlock)FindName($"ui_text_{microBoard}_{microX}_{microY}");
                         int value = context.Engine.CurrentBoard.Slots[x][y];
                         textBlock.Text = value == 0 ? "" : (value == 1 ? "1" : "2");
-
-
                     }
                 }
 
@@ -160,7 +159,22 @@ namespace RandToe
 
         private void MainGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            ui_mainGrid.MaxHeight = e.NewSize.Width;
+            if(e.NewSize.Width < e.NewSize.Height)
+            {
+                ui_mainGrid.MaxHeight = e.NewSize.Width;
+            }
+            else
+            {
+                ui_mainGrid.MaxWidth = e.NewSize.Height;
+            }
+        }
+
+        private async void Logger_OnLogMessage(LogLevels level, string formattedMessage)
+        {
+            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
+            {
+                ui_gameLog.Text += formattedMessage + Environment.NewLine;
+            });
         }
     }
 }

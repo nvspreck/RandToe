@@ -8,15 +8,17 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
 
-        <TextBlock x:Name="ui_readyPlayerText" Margin="12"/>
+        <TextBlock x:Name="ui_readyPlayerText" Margin="12" />
 
-
-        <Grid Margin="12" x:Name="ui_mainGrid" SizeChanged="MainGrid_SizeChanged" Grid.Row="1">
+        <Grid x:Name="ui_mainGrid"
+              Grid.Row="1"
+              Margin="12"
+              SizeChanged="MainGrid_SizeChanged">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
@@ -150,7 +152,9 @@
                 </Grid>
             </Grid>
 
-            <Grid Grid.Row="0" Grid.Column="1" Background="#220000FF">
+            <Grid Grid.Row="0"
+                  Grid.Column="1"
+                  Background="#220000FF">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
@@ -394,7 +398,9 @@
                 </Grid>
             </Grid>
 
-            <Grid Grid.Row="1" Grid.Column="0" Background="#220000FF">
+            <Grid Grid.Row="1"
+                  Grid.Column="0"
+                  Background="#220000FF">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
@@ -638,7 +644,9 @@
                 </Grid>
             </Grid>
 
-            <Grid Grid.Row="1" Grid.Column="2" Background="#220000FF">
+            <Grid Grid.Row="1"
+                  Grid.Column="2"
+                  Background="#220000FF">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
@@ -882,7 +890,9 @@
                 </Grid>
             </Grid>
 
-            <Grid Grid.Row="2" Grid.Column="1" Background="#220000FF">
+            <Grid Grid.Row="2"
+                  Grid.Column="1"
+                  Background="#220000FF">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
@@ -1126,5 +1136,12 @@
                 </Grid>
             </Grid>
         </Grid>
+
+        <ScrollViewer Grid.Row="2"
+                      Margin="12"
+                      HorizontalScrollMode="Disabled"
+                      VerticalScrollMode="Auto">
+            <TextBlock x:Name="ui_gameLog" />
+        </ScrollViewer>
     </Grid>
 </Page>

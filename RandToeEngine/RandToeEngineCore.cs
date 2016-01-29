@@ -378,6 +378,7 @@ namespace RandToeEngine
             // Validate the move, make sure there isn't already a play here.
             if(CurrentBoard.Slots[x][y] != 0)
             {
+                Logger.Log(this, $"Make move has been called with an illegal move! The space is not empty", LogLevels.Error);
                 return false;
             }
 
