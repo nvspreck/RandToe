@@ -8,18 +8,18 @@ using System.Threading.Tasks;
 
 namespace RandToeEngine.Bots
 {
-    public class MasterMind : IPlayer
+    public class ThinkDeep : IPlayer
     {
         sbyte myValue = 2;
         sbyte theirValue = 1;
 
 
-        public void MoveRequested(IGameEngine engine)
+        public void MoveRequested(IPlayerBase playerBase)
         {
             // MacroBoard newboard = engine.CurrentBoard.MakeCopy();
 
-            sbyte[][] slots = engine.CurrentBoard.Slots;
-            PlayerMove move = ComputeMove(ref slots, engine.CurrentBoard.MacroBoardStates);
+            sbyte[][] slots = playerBase.CurrentBoard.Slots;
+            PlayerMove move = ComputeMove(ref slots, playerBase.CurrentBoard.MacroBoardStates);
         }
 
 
@@ -71,7 +71,7 @@ namespace RandToeEngine.Bots
 
                                 if (score > bestScore)
                                 {
-                                    bestMove = new PlayerMove(0, macroX, macroY);
+                                    bestMove = new PlayerMove(macroX, macroY);
                                 }
 
                                 // Reset the board
@@ -88,6 +88,10 @@ namespace RandToeEngine.Bots
         {
 
            // RandToeEngineCore.Logger.Log(this,"Starting Level "+level);
+
+            if(level > 5)
+
+            { return 0; }
 
             int scoreForMove = 0;
             for (int i = 0; i < 9; i++)
@@ -278,7 +282,8 @@ namespace RandToeEngine.Bots
                                     }
 
                                     // Make the move
-                                    scoreForMove += RecursiveMove(ref slots, newMacro, !isMe, ++level);
+                                    int nextLevel = level + 1;
+                                    scoreForMove += RecursiveMove(ref slots, newMacro, !isMe, nextLevel);
                                 }
 
                                 // Reset the board

@@ -8,20 +8,20 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Margin="24"
+            <TextBlock Margin="12"
                        HorizontalAlignment="Center"
-                       FontSize="24"
+                       Style="{ThemeResource SubheaderTextBlockStyle}"
                        Text="RandToe" />
+
+            <ComboBox x:Name="ui_botSelector"
+                      Width="200"
+                      Margin="12" />
+
             <Button Width="200"
-                    Margin="24"
-                    HorizontalAlignment="Center"
-                    Click="PlayNetwork_Click"
-                    Content="Play Network" />
-            <Button Width="200"
-                    Margin="24"
+                    Margin="12"
                     HorizontalAlignment="Center"
                     Click="PlayLocal_Click"
-                    Content="Play Local" />
+                    Content="Start Game" />
         </StackPanel>
     </Grid>
 </Page>

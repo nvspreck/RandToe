@@ -31,7 +31,7 @@ namespace RandToeEngine.CommonObjects
         /// <summary>
         /// The micro boards that represent this game board.
         /// </summary>
-        //public MicroBoard[][] MicroBoards { get; private set; }
+        public MicroBoard[][] MicroBoards { get; private set; }
 
 
         #region Static Setup
@@ -58,31 +58,30 @@ namespace RandToeEngine.CommonObjects
             board.MacroBoardStates = macroboard;
 
             // Create the micro boards
-           // board.CreateMicroBoards();
+            board.CreateMicroBoards();
 
             // Set that we are ready
             board.HasAllData = true;
         }
 
-        ///// <summary>
-        ///// Creates the micro boards.
-        ///// </summary>
-        //private void CreateMicroBoards()
-        //{
-        //    // Create the rows
-        //    MicroBoards = new MicroBoard[3][];
+        /// <summary>
+        /// Creates the micro boards.
+        /// </summary>
+        private void CreateMicroBoards()
+        {
+            // Create the rows
+            MicroBoards = new MicroBoard[3][];
 
-        //    // Make the boards
-        //    for(int row = 0; row < 3; row++)
-        //    {
-        //        MicroBoards[row] = new MicroBoard[3];
-        //        for (int col = 0; col < 3; col++)
-        //        {
-        //            //MicroBoards[row][col] = new MicroBoard();
-        //        }
-        //    }
-        //}
-
+            // Make the micro boards
+            for(int row = 0; row < 3; row++)
+            {
+                MicroBoards[row] = new MicroBoard[3];
+                for (int col = 0; col < 3; col++)
+                {
+                   MicroBoards[row][col] = MicroBoard.CreateBoard(this, row, col);
+                }
+            }
+        }
 
         private MacroBoard(int round, sbyte[] fields)
         {
@@ -91,7 +90,7 @@ namespace RandToeEngine.CommonObjects
 
             // Set the slots
             Slots = new sbyte[9][];
-            int count = 0;       
+            int count = 0;
             for(int y = 0; y < 9; y++)
             {
                 for(int x = 0; x < 9; x++)
@@ -106,31 +105,44 @@ namespace RandToeEngine.CommonObjects
             }
         }
 
-        private MacroBoard()
-        { }
+        #endregion
+
+
+        #region Micro Board Logic
+
+        /// <summary>
+        /// Returns the Micro board for the given macro x and y cords.
+        /// </summary>
+        /// <param name="macroX"></param>
+        /// <param name="macroY"></param>
+        public MicroBoard GetMicroBoardForMacroCords(int macroX, int macroY)
+        {
+            // Fix the offset
+            int microY = (int)Math.Floor(macroY / 3.0);
+            int microX = (int)Math.Floor(macroX / 3.0);
+            return MicroBoards[microX][microY];
+        }
 
         #endregion
 
-        #region Copy
+        #region Moves Logic
 
-        public MacroBoard MakeCopy()
+        /// <summary>
+        /// Returns all possible moves for this board.
+        /// </summary>
+        /// <returns></returns>
+        public List<PlayerMove> GetAllPossibleMoves()
         {
-            MacroBoard newBoard = new MacroBoard();
-            newBoard.Round = this.Round;
-            newBoard.HasAllData = this.HasAllData;
-
-            // Copy macro
-            newBoard.MacroBoardStates = new sbyte[9];
-            Buffer.BlockCopy(this.MacroBoardStates, 0, newBoard.MacroBoardStates, 0, this.MacroBoardStates.Length * sizeof(byte));
-
-            // Copy slots
-            newBoard.Slots = new sbyte[9][];
-            for(int i =0; i < 9; i++)
+            // Run through all of the micro boards and gather any moves they have.
+            List<PlayerMove> moves = new List<PlayerMove>();
+            for (int y = 0; y < 3; y++)
             {
-                newBoard.Slots[i] = new sbyte[9];
-                Buffer.BlockCopy(this.Slots[i], 0, newBoard.Slots[i], 0, this.Slots.Length * sizeof(byte));
+                for (int x = 0; x < 3; x++)
+                {
+                    moves.AddRange(MicroBoards[x][y].GetPossibleMoves());
+                }
             }
-            return newBoard;
+            return moves;
         }
 
         #endregion

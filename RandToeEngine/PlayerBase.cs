@@ -10,9 +10,9 @@ using RandToeEngine.CommonObjects;
 namespace RandToeEngine
 {
     /// <summary>
-    /// The main logic engine for RandToe
+    /// The base logic for any player
     /// </summary>
-    public class RandToeEngineCore: ICommandConsumer, IGameEngine
+    public class PlayerBase: ICommandConsumer, IPlayerBase
     {
         /// <summary>
         /// This is our static logger. This can be used by anyone to log events.
@@ -29,7 +29,8 @@ namespace RandToeEngine
         /// </summary>
         readonly IPlayer m_player;
 
-        public RandToeEngineCore(IMoveCommandConsumer moveConsumer, IPlayer player)
+
+        public PlayerBase(IMoveCommandConsumer moveConsumer, IPlayer player)
         {
             m_moveConsumer = moveConsumer;
             m_player = player;
@@ -373,21 +374,24 @@ namespace RandToeEngine
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        public bool MakeMove(int x, int y)
+        public bool MakeMove(PlayerMove move)
         {
             // Validate the move, make sure there isn't already a play here.
-            if(CurrentBoard.Slots[x][y] != 0)
+            if(CurrentBoard.Slots[move.MacroX][move.MacroY] != 0)
             {
                 Logger.Log(this, $"Make move has been called with an illegal move! The space is not empty", LogLevels.Error);
                 return false;
             }
 
             // Validate they are playing in a box that can be played in
-            //if()
-
+            if(!CurrentBoard.GetMicroBoardForMacroCords(move.MacroX, move.MacroY).IsPlayable)
+            {
+                Logger.Log(this, $"Make move has been called with an illegal move! The board is not playable!", LogLevels.Error);
+                return false;
+            }
 
             // Make the move
-            m_moveConsumer.OnMakeMoveCommand($"place_move {x} {y}");
+            m_moveConsumer.OnMakeMoveCommand($"place_move {move.MacroX} {move.MacroY}");
             return true;
         }
 
