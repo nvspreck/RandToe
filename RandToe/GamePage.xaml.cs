@@ -18,10 +18,121 @@ using RandToeEngine.Interfaces;
 using System.Threading.Tasks;
 using Windows.UI.Core;
 
+
+using System;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+
+
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace RandToe
 {
+    class GameRunner : IMoveCommandConsumer
+    {
+
+        private bool IsLegalMove(int x, int y)
+        {
+
+
+        }
+
+        private void MakeMove(int x, int y)
+        {
+
+        }
+
+        private bool IsGameOver()
+        {
+
+        }
+
+        /// <summary>
+        /// Called when someone wants to send the move command.
+        /// </summary>
+        /// <param name="moveCommand"></param>
+        public void OnMakeMoveCommand(string moveCommand)
+        {
+
+            string commandLower = moveCommand.ToLower();
+
+            // break the command into parts.
+            string[] commandParts = commandLower.Split(' ');
+
+            if (commandParts.Length < 3)
+            {
+                //Logger.Log(this, "The command is invalid! It has less than 3 parts.", LogLevels.Error);
+                return;
+            }
+
+            int x = Int32.Parse(commandParts[1]);
+            int y = Int32.Parse(commandParts[2]);
+
+            if (IsLegalMove(x, y))
+            {
+                MakeMove(x, y);
+                if (IsGameOver())
+                {
+
+                }
+                else
+                {
+                    //toggle current player
+                    //update move / round
+                    //send action move to new current player
+                }
+            }
+
+      
+        }
+
+        public void Run(PlayerContext playerOne, PlayerContext playerTwo)
+        {
+            m_playerOne = playerOne;
+            m_playerTwo = playerTwo;
+
+
+            // tell them the setting and shit everything the server says it will to both players
+            string timeBank = "settings timebank 10000";
+            string timePerMove = "settings time_per_move 500";
+            string names = "settings player_names player1,player2";
+            string yourname1 = "settings your_bot player1";
+            string yourname2 = "settings your_bot player2";
+            string yourid1 = "settings your_botid 1";
+            string yourid2 = "settings your_botid 2";
+
+            m_playerOne.Engine.OnCommandRecieved(timeBank);
+            m_playerOne.Engine.OnCommandRecieved(timePerMove);
+            m_playerOne.Engine.OnCommandRecieved(names);
+            m_playerOne.Engine.OnCommandRecieved(yourname1);
+            m_playerOne.Engine.OnCommandRecieved(yourid1);
+
+            m_playerTwo.Engine.OnCommandRecieved(timeBank);
+            m_playerTwo.Engine.OnCommandRecieved(timePerMove);
+            m_playerTwo.Engine.OnCommandRecieved(names);
+            m_playerTwo.Engine.OnCommandRecieved(yourname2);
+            m_playerTwo.Engine.OnCommandRecieved(yourid2);
+
+
+            string round1 = "update game round 1";
+            string move1 = "update game move 1";
+            string gamefield1 = "update game field 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+            string macroboard1 = "update game macroboard - 1,-1,-1,-1,-1,-1,-1,-1,-1";
+            string move1 = "action move 10000";
+
+            m_playerOne.Engine.OnCommandRecieved(round1);
+            m_playerOne.Engine.OnCommandRecieved(move1);
+            m_playerOne.Engine.OnCommandRecieved(gamefield1);
+            m_playerOne.Engine.OnCommandRecieved(macroboard1);
+            m_playerOne.Engine.OnCommandRecieved(move1);
+            
+        }
+
+        private PlayerContext m_playerOne;
+        private PlayerContext m_playerTwo;
+        private PlayerContext m_currentTurn;
+    }
 
     class PlayerContext : IPlayer
     {
@@ -70,21 +181,25 @@ namespace RandToe
             }
             else
             {
+                GameRunner gameRunner = new GameRunner();
+
                 // Make player 1
+
                 m_player1 = new PlayerContext();
                 m_player1.PlayerNumber = 1;
                 m_player1.Callback = UpdateGameState;
-                m_player1.Engine = new RandToeEngineCore(null, m_player1);
-
+                m_player1.Engine = new RandToeEngineCore(gameRunner, m_player1);
                 // make player 2
+
                 m_player2 = new PlayerContext();
                 m_player2.PlayerNumber = 2;
                 m_player2.Callback = UpdateGameState;
-                m_player2.Engine = new RandToeEngineCore(null, m_player2);
+                m_player2.Engine = new RandToeEngineCore(gameRunner, m_player2);
 
-                m_player1.Engine.OnCommandRecieved("update game field 0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
-                m_player1.Engine.OnCommandRecieved("update game macroboard -1,0,0,0,0,0,0,0,0");
-                m_player1.Engine.OnCommandRecieved("action move 1000");
+                RandToeEngineCore.Logger.Log(this, "Created Players");
+
+                gameRunner.Run(m_player1, m_player2);
+                
             }
         }
 
