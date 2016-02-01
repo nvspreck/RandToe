@@ -12,7 +12,7 @@ namespace RandToeEngine.Bots
         /// <summary>
         /// The list of bots that can be used.
         /// </summary>
-        private static readonly Type[] m_bots = { typeof(RandBot) };
+        private static readonly Type[] m_bots = { typeof(RandBot), typeof(ThinkDeep) };
 
         /// <summary>
         /// Returns a list of bot names that can be used.

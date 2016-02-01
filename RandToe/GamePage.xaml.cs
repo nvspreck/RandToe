@@ -123,8 +123,8 @@ namespace RandToe
             await Task.Run(() =>
             {
                 // Push the game to update.
-                m_player1.OnCommandRecieved("update game field 0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
-                m_player1.OnCommandRecieved("update game macroboard -1,0,0,0,0,0,0,0,0");
+                m_player1.OnCommandRecieved("update game field 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
+                m_player1.OnCommandRecieved("update game macroboard 0,0,0,0,-1,0,0,0,0");
                 m_player1.OnCommandRecieved("action move 1000");
             });
         }
