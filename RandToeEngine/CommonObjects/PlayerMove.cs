@@ -8,17 +8,14 @@ namespace RandToeEngine.CommonObjects
 {
     public class PlayerMove
     {
-        public PlayerMove(int playerId, int x, int y)
+        public PlayerMove(int macroX, int macroY)
         {
-            X = x;
-            Y = y;
-            PlayerId = playerId;
+            MacroX= macroX;
+            MacroY = macroY;
         }
 
-        public int X { get; }
+        public int MacroX { get; }
 
-        public int Y { get; }
-
-        public int PlayerId { get; }
+        public int MacroY { get; }
     }
 }

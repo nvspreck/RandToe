@@ -9,24 +9,10 @@ using Windows.UI.Core;
 
 namespace RandToe
 {
-    public class PlayerMove
-    {
-        public PlayerMove(int x, int y, int d)
-        {
-
-        }
-    }
-
-    public delegate void OnNewMoveMadeDelegate(PlayerMove move);
-
     class NetworkGameEngine
     {
         const string c_hubUrl = "http://randtoeweb.azurewebsites.net/";
 
-        /// <summary>
-        /// Fired when a new move has been made.
-        /// </summary>
-        public event OnNewMoveMadeDelegate OnNewMoveMade;
 
         // Private vars
         HubConnection m_hub;
@@ -67,18 +53,18 @@ namespace RandToe
             {
                 foreach (WebMove move in game.Moves)
                 {
-                    PlayerMove playerMove = new PlayerMove(move.XCord, move.YCord, move.Player);
-                    if(OnNewMoveMade != null)
-                    {
-                        await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
-                        {
-                            OnNewMoveMade(playerMove);
-                        });
+                    //PlayerMove playerMove = new PlayerMove(move.XCord, move.YCord, move.Player);
+                    //if(OnNewMoveMade != null)
+                    //{
+                    //    await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+                    //    {
+                    //        OnNewMoveMade(playerMove);
+                    //    });
 
-                        await Task.Delay(500);
-                    }
+                    //    await Task.Delay(500);
+                    //}
                 }
-            }           
+            }
         }
 
         #region Network Classes

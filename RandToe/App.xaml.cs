@@ -7,6 +7,8 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -28,9 +30,6 @@ namespace RandToe
         /// </summary>
         public App()
         {
-            Microsoft.ApplicationInsights.WindowsAppInitializer.InitializeAsync(
-                Microsoft.ApplicationInsights.WindowsCollectors.Metadata |
-                Microsoft.ApplicationInsights.WindowsCollectors.Session);
             this.InitializeComponent();
             this.Suspending += OnSuspending;
         }
@@ -42,14 +41,6 @@ namespace RandToe
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-
-#if DEBUG
-            if (System.Diagnostics.Debugger.IsAttached)
-            {
-                this.DebugSettings.EnableFrameRateCounter = true;
-            }
-#endif
-
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
@@ -79,6 +70,32 @@ namespace RandToe
             }
             // Ensure the current window is active
             Window.Current.Activate();
+
+            // Setup the back button
+            SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
+            Windows.UI.Core.SystemNavigationManager.GetForCurrentView().BackRequested += MainPage_BackRequested;
+        }
+
+        private async void MainPage_BackRequested(object sender, BackRequestedEventArgs e)
+        {
+            // Ask the user how should go first
+            bool goBack = false;
+            MessageDialog message = new MessageDialog("Are you sure you want to leave this game?", "Leave Game");
+            message.Commands.Add(new UICommand("Yes", (command) =>
+            {
+                goBack = true;
+            }));
+            message.Commands.Add(new UICommand("No", (command) =>
+            {
+                goBack = false;
+            }));
+            await message.ShowAsync();
+
+            Frame frame = (Window.Current.Content as Frame);
+            if (goBack && frame.CanGoBack)
+            {
+                frame.GoBack();
+            }
         }
 
         /// <summary>

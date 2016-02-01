@@ -12,7 +12,7 @@ namespace RandToeEngine.Interfaces
         /// <summary>
         /// Called when the player should make a move.
         /// </summary>
-        /// <param name="engine"></param>
-        void MoveRequested(IGameEngine engine);
+        /// <param name="playerBase"></param>
+        void MoveRequested(IPlayerBase playerBase);
     }
 }

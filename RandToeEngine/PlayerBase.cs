@@ -10,9 +10,9 @@ using RandToeEngine.CommonObjects;
 namespace RandToeEngine
 {
     /// <summary>
-    /// The main logic engine for RandToe
+    /// The base logic for any player
     /// </summary>
-    public class RandToeEngineCore: ICommandConsumer, IGameEngine
+    public class PlayerBase: ICommandConsumer, IPlayerBase
     {
         /// <summary>
         /// This is our static logger. This can be used by anyone to log events.
@@ -29,7 +29,8 @@ namespace RandToeEngine
         /// </summary>
         readonly IPlayer m_player;
 
-        public RandToeEngineCore(IMoveCommandConsumer moveConsumer, IPlayer player)
+
+        public PlayerBase(IMoveCommandConsumer moveConsumer, IPlayer player)
         {
             m_moveConsumer = moveConsumer;
             m_player = player;
@@ -191,7 +192,7 @@ namespace RandToeEngine
                     break;
                 case "field":
                     // Parse the value
-                    int[] fieldArray = ParseBoardIntArray(commandParts[3], 81);
+                    sbyte[] fieldArray = ParseBoardByteArray(commandParts[3], 81);
                     if(fieldArray != null)
                     {
                         SetNewBoardValue(fieldArray, null);
@@ -199,7 +200,7 @@ namespace RandToeEngine
                     break;
                 case "macroboard":
                     // Parse the value
-                    int[] macroArray = ParseBoardIntArray(commandParts[3], 9);
+                    sbyte[] macroArray = ParseBoardByteArray(commandParts[3], 9);
                     if (macroArray != null)
                     {
                         SetNewBoardValue(null, macroArray);
@@ -212,20 +213,20 @@ namespace RandToeEngine
         }
 
         /// <summary>
-        /// Parses an int array.
+        /// Parses an byte array.
         /// </summary>
         /// <param name="intArrayString"></param>
         /// <param name="expectedCount"></param>
         /// <returns></returns>
-        private int[] ParseBoardIntArray(string intArrayString, int expectedCount)
+        private sbyte[] ParseBoardByteArray(string intArrayString, int expectedCount)
         {
             // Parse the value
-            int[] intArray = new int[expectedCount];
+            sbyte[] intArray = new sbyte[expectedCount];
             string[] fieldStringArray = intArrayString.Split(',');
             int count = 0;
             foreach (string field in fieldStringArray)
             {
-                if (!int.TryParse(fieldStringArray[count], out intArray[count]))
+                if (!sbyte.TryParse(fieldStringArray[count], out intArray[count]))
                 {
                     Logger.Log(this, $"Failed to parse int array pos:({count}) string:({intArrayString})", LogLevels.Error);
                 }
@@ -247,7 +248,7 @@ namespace RandToeEngine
         /// </summary>
         /// <param name="fieldArray"></param>
         /// <param name="macroBoard"></param>
-        private void SetNewBoardValue(int[] fieldArray, int[] macroBoard)
+        private void SetNewBoardValue(sbyte[] fieldArray, sbyte[] macroBoard)
         {
             // If we have a field set
             if(fieldArray != null)
@@ -259,7 +260,7 @@ namespace RandToeEngine
                 }
 
                 // Make a new board
-                CurrentBoard = UltimateTicTacToeBoard.CreateNewBoard(CurrentRound, fieldArray);
+                CurrentBoard = MacroBoard.CreateNewBoard(CurrentRound, fieldArray);
             }
 
             // If we have a macro board set it.
@@ -277,7 +278,7 @@ namespace RandToeEngine
                 }
 
                 // Set the values
-                UltimateTicTacToeBoard.AddMacroboardData(CurrentBoard, macroBoard);
+                MacroBoard.AddMacroboardData(CurrentBoard, macroBoard);
             }
         }
 
@@ -326,7 +327,7 @@ namespace RandToeEngine
         /// <summary>
         /// The current game board.
         /// </summary>
-        public UltimateTicTacToeBoard CurrentBoard { get; private set; }
+        public MacroBoard CurrentBoard { get; private set; }
 
         /// <summary>
         /// The number of the current move
@@ -373,20 +374,24 @@ namespace RandToeEngine
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        public bool MakeMove(int x, int y)
+        public bool MakeMove(PlayerMove move)
         {
             // Validate the move, make sure there isn't already a play here.
-            if(CurrentBoard.Slots[x][y] != 0)
+            if(CurrentBoard.Slots[move.MacroX][move.MacroY] != 0)
             {
+                Logger.Log(this, $"Make move has been called with an illegal move! The space is not empty", LogLevels.Error);
                 return false;
             }
 
             // Validate they are playing in a box that can be played in
-            //if()
-
+            if(!CurrentBoard.GetMicroBoardForMacroCords(move.MacroX, move.MacroY).IsPlayable)
+            {
+                Logger.Log(this, $"Make move has been called with an illegal move! The board is not playable!", LogLevels.Error);
+                return false;
+            }
 
             // Make the move
-            m_moveConsumer.OnMakeMoveCommand($"place_move {x} {y}");
+            m_moveConsumer.OnMakeMoveCommand($"place_move {move.MacroX} {move.MacroY}");
             return true;
         }
 
