@@ -40,16 +40,60 @@ namespace RandToe
 
         private bool IsLegalMove(int x, int y)
         {
+            PlayerMove pm = new PlayerMove(x, y);
+            List<PlayerMove> avaliableMoves = m_board.GetAllPossibleMoves();
 
-
+            return avaliableMoves.Contains(pm);
         }
 
         private void MakeMove(int x, int y)
         {
-
+            m_board.Slots[x][y] = m_currentTurn.PlayerId;
         }
 
         private bool IsGameOver()
+        {
+            return m_board.HasPlayerWon(m_move);
+        }
+
+        private void ToggleCurrentPlayer()
+        {
+            if (m_currentTurn == m_playerOne)
+            {
+                m_currentTurn = m_playerTwo;
+            }
+            else
+            {
+                m_currentTurn = m_playerOne;
+            }
+        }
+
+        private void UpdateMoveRound()
+        {
+            m_move += 1;
+            if (m_move == 3)
+            {
+                m_round += 1;
+                m_move = 1;
+            }
+        }
+
+        private void SendMoveToCurrentPlayer()
+        {
+            string round1 = "update game round " + m_round;
+            string updatemove1 = "update game move " + m_move;
+            string gamefield1 = "update game field "; // plus the board state 
+            string macroboard1 = "update game macroboard "; // plus the macro board state
+            string move = "action move 10000";
+
+            m_currentTurn.OnCommandRecieved(round1);
+            m_currentTurn.OnCommandRecieved(updatemove1);
+            m_currentTurn.OnCommandRecieved(gamefield1);
+            m_currentTurn.OnCommandRecieved(macroboard1);
+            m_currentTurn.OnCommandRecieved(move);
+        }
+
+        private void EndGame()
         {
 
         }
@@ -68,7 +112,6 @@ namespace RandToe
 
             if (commandParts.Length < 3)
             {
-                //Logger.Log(this, "The command is invalid! It has less than 3 parts.", LogLevels.Error);
                 return;
             }
 
@@ -80,20 +123,18 @@ namespace RandToe
                 MakeMove(x, y);
                 if (IsGameOver())
                 {
-
+                    EndGame();
                 }
                 else
                 {
-                    //toggle current player
-                    //update move / round
-                    //send action move to new current player
+                    ToggleCurrentPlayer();
+                    UpdateMoveRound();
+                    SendMoveToCurrentPlayer();
                 }
             }
-
-      
         }
 
-        public void Run(PlayerContext playerOne, PlayerContext playerTwo)
+        public void Run(PlayerBase playerOne, PlayerBase playerTwo)
         {
             m_playerOne = playerOne;
             m_playerTwo = playerTwo;
@@ -108,48 +149,41 @@ namespace RandToe
             string yourid1 = "settings your_botid 1";
             string yourid2 = "settings your_botid 2";
 
-            m_playerOne.Engine.OnCommandRecieved(timeBank);
-            m_playerOne.Engine.OnCommandRecieved(timePerMove);
-            m_playerOne.Engine.OnCommandRecieved(names);
-            m_playerOne.Engine.OnCommandRecieved(yourname1);
-            m_playerOne.Engine.OnCommandRecieved(yourid1);
+            m_playerOne.OnCommandRecieved(timeBank);
+            m_playerOne.OnCommandRecieved(timePerMove);
+            m_playerOne.OnCommandRecieved(names);
+            m_playerOne.OnCommandRecieved(yourname1);
+            m_playerOne.OnCommandRecieved(yourid1);
 
-            m_playerTwo.Engine.OnCommandRecieved(timeBank);
-            m_playerTwo.Engine.OnCommandRecieved(timePerMove);
-            m_playerTwo.Engine.OnCommandRecieved(names);
-            m_playerTwo.Engine.OnCommandRecieved(yourname2);
-            m_playerTwo.Engine.OnCommandRecieved(yourid2);
+            m_playerTwo.OnCommandRecieved(timeBank);
+            m_playerTwo.OnCommandRecieved(timePerMove);
+            m_playerTwo.OnCommandRecieved(names);
+            m_playerTwo.OnCommandRecieved(yourname2);
+            m_playerTwo.OnCommandRecieved(yourid2);
+
+            m_currentTurn = m_playerOne;
+            m_round = 1;
+            m_move = 1;
+
+            sbyte[] intArray = new sbyte[81];
+
+            for (int i = 0; i < 81; i++)
+            {
+                intArray[i] = 0;
+            }
+
+            m_board = MacroBoard.CreateNewBoard(1,intArray);
 
 
-            string round1 = "update game round 1";
-            string move1 = "update game move 1";
-            string gamefield1 = "update game field 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-            string macroboard1 = "update game macroboard - 1,-1,-1,-1,-1,-1,-1,-1,-1";
-            string move1 = "action move 10000";
-
-            m_playerOne.Engine.OnCommandRecieved(round1);
-            m_playerOne.Engine.OnCommandRecieved(move1);
-            m_playerOne.Engine.OnCommandRecieved(gamefield1);
-            m_playerOne.Engine.OnCommandRecieved(macroboard1);
-            m_playerOne.Engine.OnCommandRecieved(move1);
-            
+            SendMoveToCurrentPlayer();
         }
 
-        private PlayerContext m_playerOne;
-        private PlayerContext m_playerTwo;
-        private PlayerContext m_currentTurn;
-    }
-
-    class PlayerContext : IPlayer
-    {
-        public int PlayerNumber;
-        public RandToeEngineCore Engine;
-        public Action<PlayerContext> Callback;
-
-        public void MoveRequested(IGameEngine engine)
-        {
-            Callback(this);
-        }
+        private PlayerBase m_playerOne;
+        private PlayerBase m_playerTwo;
+        private PlayerBase m_currentTurn;
+        private sbyte m_round;
+        private sbyte m_move;
+        private MacroBoard m_board;
     }
 
     /// <summary>
@@ -203,8 +237,12 @@ namespace RandToe
         /// <param name="args"></param>
         protected async override void OnNavigatedTo(NavigationEventArgs args)
         {
+            //Set up the game backend
+            GameRunner gameRunner = new GameRunner();
+
+
             // Setup the human player
-            PlayerBase humanPlayer = new PlayerBase(null, this);
+            PlayerBase humanPlayer = new PlayerBase(gameRunner, this);
             PlayerBase humanOrBotPlayer = null;
 
             // Figure out if player 2 is a bot or a local player.
@@ -221,42 +259,16 @@ namespace RandToe
                     if(botName.Equals(NavArg_LocalPlayerName))
                     {
                         // If we are playing a local player set it up as a player.
-                        humanOrBotPlayer = new PlayerBase(null, this);
+                        humanOrBotPlayer = new PlayerBase(gameRunner, this);
                     }
                     else
                     {
-                        humanOrBotPlayer = new PlayerBase(null, BotManager.GetBot(botName));
+                        humanOrBotPlayer = new PlayerBase(gameRunner, BotManager.GetBot(botName));
                         isOtherPlayerBot = true;
                     }
                 }
             }
-
-
-            /*
             
-<<<<<<< HEAD
-                GameRunner gameRunner = new GameRunner();
-
-                // Make player 1
-
-                m_player1 = new PlayerContext();
-                m_player1.PlayerNumber = 1;
-                m_player1.Callback = UpdateGameState;
-                m_player1.Engine = new RandToeEngineCore(gameRunner, m_player1);
-                // make player 2
-
-                m_player2 = new PlayerContext();
-                m_player2.PlayerNumber = 2;
-                m_player2.Callback = UpdateGameState;
-                m_player2.Engine = new RandToeEngineCore(gameRunner, m_player2);
-
-                RandToeEngineCore.Logger.Log(this, "Created Players");
-
-                gameRunner.Run(m_player1, m_player2);
-                
-            }
-=======
-*/
             // Ask the user how should go first
             bool playerOneFirst = true;
             MessageDialog message = new MessageDialog("Who should play first?", "Ready Player 1?");
@@ -276,10 +288,7 @@ namespace RandToe
 
             await Task.Run(() =>
             {
-                // Push the game to update.
-                m_player1.OnCommandRecieved("update game field 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
-                m_player1.OnCommandRecieved("update game macroboard 0,0,0,0,-1,0,0,0,0");
-                m_player1.OnCommandRecieved("action move 1000");
+                gameRunner.Run(m_player1, m_player2);
             });
         }
 

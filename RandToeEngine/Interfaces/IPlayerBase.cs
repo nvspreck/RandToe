@@ -32,7 +32,7 @@ namespace RandToeEngine.Interfaces
         /// <summary>
         /// The value that you will use to make moves.
         /// </summary>
-        int PlayerId { get; }
+        sbyte PlayerId { get; }
 
         /// <summary>
         /// The current round.

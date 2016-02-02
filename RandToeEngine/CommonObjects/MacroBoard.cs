@@ -64,6 +64,90 @@ namespace RandToeEngine.CommonObjects
             board.HasAllData = true;
         }
 
+        public bool HasPlayerWon(sbyte playerId)
+        {
+            //0,1,2
+            //3,4,5
+            //6,7,8
+
+            if (MacroBoardStates[0] == playerId)
+            {
+                if (MacroBoardStates[1] == playerId)
+                {
+                    if (MacroBoardStates[2] == playerId)
+                    {
+                        return true;
+                    }
+                }
+                if (MacroBoardStates[4] == playerId)
+                {
+                    if (MacroBoardStates[8] == playerId)
+                    {
+                        return true;
+                    }
+                }
+                if (MacroBoardStates[3] == playerId)
+                {
+                    if (MacroBoardStates[6] == playerId)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (MacroBoardStates[1] == playerId)
+            {
+                if (MacroBoardStates[4] == playerId)
+                {
+                    if (MacroBoardStates[7] == playerId)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (MacroBoardStates[2] == playerId)
+            {
+                if (MacroBoardStates[5] == playerId)
+                {
+                    if (MacroBoardStates[8] == playerId)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (MacroBoardStates[3] == playerId)
+            {
+                if (MacroBoardStates[4] == playerId)
+                {
+                    if (MacroBoardStates[5] == playerId)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (MacroBoardStates[6] == playerId)
+            {
+                if (MacroBoardStates[7] == playerId)
+                {
+                    if (MacroBoardStates[8] == playerId)
+                    {
+                        return true;
+                    }
+                }
+                if (MacroBoardStates[4] == playerId)
+                {
+                    if (MacroBoardStates[2] == playerId)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Creates the micro boards.
         /// </summary>

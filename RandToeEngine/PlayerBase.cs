@@ -129,8 +129,8 @@ namespace RandToeEngine
                     Logger.Log(this, $"PlayerName updated ({PlayerName})");
                     break;
                 case "your_botid":
-                    int botId;
-                    if (int.TryParse(commandParts[2], out botId))
+                    sbyte botId;
+                    if (sbyte.TryParse(commandParts[2], out botId))
                     {
                         PlayerId = botId;
                         Logger.Log(this, $"PlayerId updated ({PlayerId})");
@@ -342,7 +342,7 @@ namespace RandToeEngine
         /// <summary>
         /// The player Id
         /// </summary>
-        public int PlayerId { get; private set; }
+        public sbyte PlayerId { get; private set; }
 
         /// <summary>
         /// The player name
