@@ -168,7 +168,7 @@ namespace RandToeEngine
             {
                 case "round":
                     int newRound;
-                    if (int.TryParse(commandParts[2], out newRound))
+                    if (int.TryParse(commandParts[3], out newRound))
                     {
                         CurrentRound = newRound;
                         Logger.Log(this, $"CurrentRound updated ({CurrentRound})");
@@ -180,7 +180,7 @@ namespace RandToeEngine
                     break;
                 case "move":
                     int newMove;
-                    if (int.TryParse(commandParts[2], out newMove))
+                    if (int.TryParse(commandParts[3], out newMove))
                     {
                         CurrentMove = newMove;
                         Logger.Log(this, $"CurrentMove updated ({CurrentMove})");
