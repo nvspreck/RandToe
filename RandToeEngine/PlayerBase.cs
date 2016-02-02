@@ -34,6 +34,7 @@ namespace RandToeEngine
         {
             m_moveConsumer = moveConsumer;
             m_player = player;
+            HistoricMoves = new List<HistoricPlayerMove>();
         }
 
         #region ICommandConsumer
@@ -259,8 +260,14 @@ namespace RandToeEngine
                     Logger.Log(this, $"We are creating a new board with a new field value but the round is the same! Round:({CurrentRound})", LogLevels.Warn);
                 }
 
+                // Capture the last board
+                MacroBoard lastBoard = CurrentBoard;
+
                 // Make a new board
                 CurrentBoard = MacroBoard.CreateNewBoard(CurrentRound, fieldArray);
+
+                // Find what move they made, and add it to the list.
+                FindOpponentMove(lastBoard, CurrentBoard);
             }
 
             // If we have a macro board set it.
@@ -370,6 +377,11 @@ namespace RandToeEngine
         public int Timebank { get; private set; }
 
         /// <summary>
+        /// A list showing the past player moves.
+        /// </summary>
+        public List<HistoricPlayerMove> HistoricMoves { get; private set; }
+
+        /// <summary>
         /// Called when we want to make a move.
         /// </summary>
         /// <param name="x"></param>
@@ -392,7 +404,102 @@ namespace RandToeEngine
 
             // Make the move
             m_moveConsumer.OnMakeMoveCommand($"place_move {move.MacroX} {move.MacroY}");
+
+            // Add to our list of moves
+            AddPlayerMoveToHistory(PlayerId, move);
+
             return true;
+        }
+
+        #endregion
+
+        #region Player History Logic
+
+        /// <summary>
+        /// Adds a player move to the history.
+        /// </summary>
+        /// <param name="playerId"></param>
+        /// <param name="move"></param>
+        private void AddPlayerMoveToHistory(sbyte playerId, PlayerMove move)
+        {
+            // Make a new move
+            HistoricPlayerMove historicMove = new HistoricPlayerMove(playerId, move);
+
+            // Add it to the list at the end.
+            HistoricMoves.Add(historicMove);
+
+            // Update the current board
+            CurrentBoard.Slots[move.MacroX][move.MacroY] = playerId;
+        }
+
+        /// <summary>
+        /// Finds what move was made by the other player.
+        /// </summary>
+        private void FindOpponentMove(MacroBoard oldBoard, MacroBoard newBoard)
+        {
+            bool foundChange = false;
+            for(int y = 0; y < 9; y++)
+            {
+                for (int x = 0; x < 9; x++)
+                {
+                    if (oldBoard != null)
+                    {
+                        // Find the difference
+                        if (oldBoard.Slots[x][y] != newBoard.Slots[x][y])
+                        {
+                            // Make sure we only get one change.
+                            if (foundChange)
+                            {
+                                PlayerBase.Logger.Log(this, $"Move than one change has been found in the game board! Old value ({oldBoard.Slots[x][y]}) New Value ({newBoard.Slots[x][y]}) x({x}) y({y})", LogLevels.Error);
+                                if (Debugger.IsAttached)
+                                {
+                                    Debugger.Break();
+                                }
+                            }
+                            foundChange = true;
+
+                            // Make sure the change is legit
+                            sbyte diffValue = newBoard.Slots[x][y];
+                            if (diffValue == 0 || diffValue == -1 || diffValue == PlayerId)
+                            {
+                                PlayerBase.Logger.Log(this, $"The calculated difference between old and new boards is not the other player's move! Old value ({oldBoard.Slots[x][y]}) New Value ({newBoard.Slots[x][y]})", LogLevels.Error);
+                                if (Debugger.IsAttached)
+                                {
+                                    Debugger.Break();
+                                }
+                            }
+
+                            // When we find it add it
+                            AddPlayerMoveToHistory(diffValue, new PlayerMove(x, y));
+
+                            // We are done. But don't break so we can validate them.
+                        }
+                    }
+                    else
+                    {
+                        // The board will be null on the first move.
+                        if(newBoard.Slots[x][y] != 0)
+                        {
+                            // Get the new value
+                            sbyte newValue = newBoard.Slots[x][y];
+                            if(newValue == PlayerId)
+                            {
+                                PlayerBase.Logger.Log(this, $"The first move wasn't us and yet it is our number!?!", LogLevels.Error);
+                                if (Debugger.IsAttached)
+                                {
+                                    Debugger.Break();
+                                }
+                            }
+
+                            // Add the move to the list.
+                            AddPlayerMoveToHistory(newValue, new PlayerMove(x, y));
+
+                            // Break
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         #endregion

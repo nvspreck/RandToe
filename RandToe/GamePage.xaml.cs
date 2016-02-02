@@ -82,8 +82,8 @@ namespace RandToe
         {
             string round1 = "update game round " + m_round;
             string updatemove1 = "update game move " + m_move;
-            string gamefield1 = "update game field "; // plus the board state 
-            string macroboard1 = "update game macroboard "; // plus the macro board state
+            string gamefield1 = "update game field"; // plus the board state
+            string macroboard1 = "update game macroboard"; // plus the macro board state
             string move = "action move 10000";
 
             m_currentTurn.OnCommandRecieved(round1);
@@ -173,6 +173,8 @@ namespace RandToe
             }
 
             m_board = MacroBoard.CreateNewBoard(1,intArray);
+            sbyte[] macroBoard = { -1, -1, -1, -1, -1, -1, -1, -1, -1};
+            MacroBoard.AddMacroboardData(m_board, macroBoard);
 
 
             SendMoveToCurrentPlayer();
@@ -268,7 +270,7 @@ namespace RandToe
                     }
                 }
             }
-            
+
             // Ask the user how should go first
             bool playerOneFirst = true;
             MessageDialog message = new MessageDialog("Who should play first?", "Ready Player 1?");
@@ -304,35 +306,52 @@ namespace RandToe
                 ui_readyPlayerText.Text = $"Player {playerBase.PlayerId}'s Turn";
 
                 m_isPlayerOneTurn = playerBase.PlayerId == 1;
+                int otherPlayerId = playerBase.PlayerId == 1 ? 2 : 1;
+                HistoricPlayerMove lastMove = playerBase.HistoricMoves.Count > 0 ? playerBase.HistoricMoves.Last<HistoricPlayerMove>() : null;
 
                 // Update the UI.
                 for (int y = 0; y < 9; y++)
                 {
                     for (int x = 0; x < 9; x++)
                     {
-                        int microBoard = ((int)Math.Floor(x / 3.0) + (int)Math.Floor(y / 3.0) * 3);
+                        int microBoardNum = ((int)Math.Floor(x / 3.0) + (int)Math.Floor(y / 3.0) * 3);
 
                         // Fix the offset
-                        int microY = y - (int)Math.Floor(microBoard / 3.0) * 3;
-                        int microX = x - (int)microBoard % 3 * 3;
+                        int microY = y - (int)Math.Floor(microBoardNum / 3.0) * 3;
+                        int microX = x - (int)microBoardNum % 3 * 3;
 
                         // Update the text
-                        TextBlock textBlock = (TextBlock)FindName($"ui_text_{microBoard}_{microX}_{microY}");
+                        TextBlock textBlock = (TextBlock)FindName($"ui_text_{microBoardNum}_{microX}_{microY}");
                         int value = playerBase.CurrentBoard.Slots[x][y];
                         textBlock.Text = value == 0 ? "" : (value == 1 ? "1" : "2");
 
                         // Update the last played cell and active box color.
-                        Grid celGrid = (Grid)FindName($"ui_grid_{microBoard}_{microX}_{microY}");
-                        if (value == 1)
+                        Grid celGrid = (Grid)FindName($"ui_grid_{microBoardNum}_{microX}_{microY}");
+                        MicroBoard microBoard = playerBase.CurrentBoard.GetMicroBoardForMacroCords(x, y);
+
+                        if (lastMove != null && lastMove.MacroX == x && lastMove.MacroY == y)
                         {
+                            // The last move made.
+                            celGrid.Background = new SolidColorBrush(Color.FromArgb(200, 255, 255, 0));
+                        }
+                        else if (microBoard.IsPlayable)
+                        {
+                            // Is playable
                             celGrid.Background = new SolidColorBrush(Color.FromArgb(75, 255, 255, 0));
                         }
-                        else if (playerBase.CurrentBoard.GetMicroBoardForMacroCords(x, y).IsPlayable)
+                        else if (microBoard.BoardState == playerBase.PlayerId)
                         {
+                            // We won
                             celGrid.Background = new SolidColorBrush(Color.FromArgb(50, 0, 255, 0));
+                        }
+                        else if (microBoard.BoardState == otherPlayerId)
+                        {
+                            // They won
+                            celGrid.Background = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0));
                         }
                         else
                         {
+                            // nothing.
                             celGrid.Background = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
                         }
                     }

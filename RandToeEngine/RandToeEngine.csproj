@@ -42,6 +42,7 @@
     <Compile Include="Bots\ThinkDeep.cs" />
     <Compile Include="Bots\BotManager.cs" />
     <Compile Include="Bots\RandBot.cs" />
+    <Compile Include="CommonObjects\HistoricPlayerMove.cs" />
     <Compile Include="CommonObjects\MicroBoard.cs" />
     <Compile Include="CommonObjects\PlayerMove.cs" />
     <Compile Include="CommonObjects\MacroBoard.cs" />

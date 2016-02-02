@@ -54,6 +54,12 @@ namespace RandToeEngine.Interfaces
         /// </summary>
         List<PlayerMove> PreviousMoves { get; }
 
+
+        /// <summary>
+        /// A list showing the past player moves.
+        /// </summary>
+        List<HistoricPlayerMove> HistoricMoves { get; }
+
         /// <summary>
         /// Called when we should make a move.
         /// </summary>
