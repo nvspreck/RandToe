@@ -402,11 +402,11 @@ namespace RandToeEngine
                 return false;
             }
 
-            // Make the move
-            m_moveConsumer.OnMakeMoveCommand($"place_move {move.MacroX} {move.MacroY}");
-
             // Add to our list of moves
             AddPlayerMoveToHistory(PlayerId, move);
+
+            // Make the move
+            m_moveConsumer.OnMakeMoveCommand($"place_move {move.MacroX} {move.MacroY}");
 
             return true;
         }

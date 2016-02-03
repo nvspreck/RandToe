@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -48,7 +47,7 @@ namespace RandToe
 
         private void MakeMove(int x, int y)
         {
-            m_board.Slots[x][y] = m_currentTurn.PlayerId;
+            m_board.MakeMove(m_currentTurn.PlayerId, new PlayerMove(x, y));
         }
 
         private bool IsGameOver()
@@ -82,8 +81,8 @@ namespace RandToe
         {
             string round1 = "update game round " + m_round;
             string updatemove1 = "update game move " + m_move;
-            string gamefield1 = "update game field"; // plus the board state
-            string macroboard1 = "update game macroboard"; // plus the macro board state
+            string gamefield1 = "update game field " + MakeFieldString(m_board);
+            string macroboard1 = "update game macroboard " + MakeMacroboardString(m_board);
             string move = "action move 10000";
 
             m_currentTurn.OnCommandRecieved(round1);
@@ -91,6 +90,29 @@ namespace RandToe
             m_currentTurn.OnCommandRecieved(gamefield1);
             m_currentTurn.OnCommandRecieved(macroboard1);
             m_currentTurn.OnCommandRecieved(move);
+        }
+
+        private string MakeFieldString(MacroBoard board)
+        {
+            string stringArray = "";
+            for(int y = 0; y < 9; y++)
+            {
+                for (int x = 0; x < 9; x++)
+                {
+                    stringArray += $"{board.Slots[x][y]},";
+                }
+            }
+            return stringArray.Substring(0, stringArray.Length -1);
+        }
+
+        private string MakeMacroboardString(MacroBoard board)
+        {
+            string stringArray = "";
+            for (int x = 0; x < 9; x++)
+            {
+                stringArray += $"{board.MacroBoardStates[x]},";
+            }
+            return stringArray.Substring(0, stringArray.Length - 1);
         }
 
         private void EndGame()
@@ -175,7 +197,6 @@ namespace RandToe
             m_board = MacroBoard.CreateNewBoard(1,intArray);
             sbyte[] macroBoard = { -1, -1, -1, -1, -1, -1, -1, -1, -1};
             MacroBoard.AddMacroboardData(m_board, macroBoard);
-
 
             SendMoveToCurrentPlayer();
         }
@@ -321,12 +342,12 @@ namespace RandToe
                         int microX = x - (int)microBoardNum % 3 * 3;
 
                         // Update the text
-                        TextBlock textBlock = (TextBlock)FindName($"ui_text_{microBoardNum}_{microX}_{microY}");
+                        TextBlock textBlock = (TextBlock)FindName($"ui_text_{microBoardNum}_{microY}_{microX}");
                         int value = playerBase.CurrentBoard.Slots[x][y];
                         textBlock.Text = value == 0 ? "" : (value == 1 ? "1" : "2");
 
                         // Update the last played cell and active box color.
-                        Grid celGrid = (Grid)FindName($"ui_grid_{microBoardNum}_{microX}_{microY}");
+                        Grid celGrid = (Grid)FindName($"ui_grid_{microBoardNum}_{microY}_{microX}");
                         MicroBoard microBoard = playerBase.CurrentBoard.GetMicroBoardForMacroCords(x, y);
 
                         if (lastMove != null && lastMove.MacroX == x && lastMove.MacroY == y)
@@ -342,12 +363,12 @@ namespace RandToe
                         else if (microBoard.BoardState == playerBase.PlayerId)
                         {
                             // We won
-                            celGrid.Background = new SolidColorBrush(Color.FromArgb(50, 0, 255, 0));
+                            celGrid.Background = new SolidColorBrush(Color.FromArgb(255, 200, 255, 200));
                         }
                         else if (microBoard.BoardState == otherPlayerId)
                         {
                             // They won
-                            celGrid.Background = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0));
+                            celGrid.Background = new SolidColorBrush(Color.FromArgb(255, 255, 200, 200));
                         }
                         else
                         {

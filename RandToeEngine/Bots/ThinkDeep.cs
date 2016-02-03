@@ -287,30 +287,30 @@ namespace RandToeEngine.Bots
                                 }
 
                                if(!hasMacroWinner)         
-                                {
-                                    
-                                    // Now figure out where to go, if the new post is -1 or 0 go there.
-                                    if (macroboard[x + y * 3] == 0 || macroboard[x + y * 3] == -1)
-                                    {
-                                        newMacro[x + y * 3] = -1;
+                               {
+                                    int sendToMicroBoardIndex = x + y * 3;
 
-                                        // Clear this if not won.
-                                        if (newMacro[i] == -1 && i != (x + y * 3))
-                                        {
-                                            newMacro[i] = 0;
-                                        }
-                                    }
-                                    else
+                                    // Figure out what our replace value is.
+                                    sbyte newReplaceValue = (newMacro[sendToMicroBoardIndex] == 1 || newMacro[sendToMicroBoardIndex] == 2) ? (sbyte)-1 : (sbyte)0;
+
+                                    // Loop through the values
+                                    for (int c = 0; c < 9; c++)
                                     {
-                                        // If the new location is won set all not one spaces to -1
-                                        for (int c = 0; c < 9; c++)
+                                        // If the board isn't won
+                                        if(newMacro[c] != 1 && newMacro[c] != 2)
                                         {
-                                            if (newMacro[c] != 1 && newMacro[c] != 2)
+                                            // If we are at the board we are looking for.
+                                            if (c == sendToMicroBoardIndex)
                                             {
                                                 newMacro[c] = -1;
                                             }
-                                        }
-                                    }
+                                            else
+                                            {
+                                                // Set the default value
+                                                newMacro[c] = newReplaceValue;
+                                            }
+                                        }                                      
+                                    }                                  
 
                                     //PrintBoardState(ref slots, newMacro, level);
 

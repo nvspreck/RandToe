@@ -191,7 +191,6 @@ namespace RandToeEngine.CommonObjects
 
         #endregion
 
-
         #region Micro Board Logic
 
         /// <summary>
@@ -227,6 +226,48 @@ namespace RandToeEngine.CommonObjects
                 }
             }
             return moves;
+        }
+
+        /// <summary>
+        /// Makes a move on the board.
+        /// </summary>
+        /// <param name="playerId"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public void MakeMove(sbyte playerId, PlayerMove moves)
+        {
+            // Make the move
+            Slots[moves.MacroX][moves.MacroY] = playerId;
+
+            // Check for a micro win.
+            GetMicroBoardForMacroCords(moves.MacroX, moves.MacroY).CheckForWin();
+
+            // Now see where we are being sent.
+            int thisMicroY = (int)Math.Floor(moves.MacroY / 3.0);
+            int thisMicroX = (int)Math.Floor(moves.MacroX / 3.0);
+            int sendToMicroBoardIndex = (int)((moves.MacroX - (thisMicroX * 3)) + (moves.MacroY - (thisMicroY * 3)) * 3);
+
+            // Figure out what our replace value is. If the board we are being sent to is one they can go anywhere, if not they can't.
+            sbyte newReplaceValue = (MacroBoardStates[sendToMicroBoardIndex] == 1 || MacroBoardStates[sendToMicroBoardIndex] == 2) ? (sbyte)-1 : (sbyte)0;
+
+            // Loop through the values
+            for (int c = 0; c < 9; c++)
+            {
+                // If the board isn't won
+                if (MacroBoardStates[c] != 1 && MacroBoardStates[c] != 2)
+                {
+                    // If we are at the board we are looking for.
+                    if (c == sendToMicroBoardIndex)
+                    {
+                        MacroBoardStates[c] = -1;
+                    }
+                    else
+                    {
+                        // Set the default value
+                        MacroBoardStates[c] = newReplaceValue;
+                    }
+                }
+            }
         }
 
         #endregion

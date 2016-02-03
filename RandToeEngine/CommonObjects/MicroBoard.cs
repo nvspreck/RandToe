@@ -126,6 +126,129 @@ namespace RandToeEngine.CommonObjects
 
         #endregion
 
+        #region Check for Win Logic
 
+        /// <summary>
+        /// Checks the current board to see if it is won.
+        /// </summary>
+        public void CheckForWin()
+        {
+            // Get the index for this microboard
+            int thisMicroBoardIndex = m_thisBoardRow + m_thisBoardCol * 3;
+
+            if(m_macroBoard.MacroBoardStates[thisMicroBoardIndex] == 1 || m_macroBoard.MacroBoardStates[thisMicroBoardIndex] == 2)
+            {
+                // The board is already won
+                return;
+            }
+
+            // Check if the board is wont and set the correct value
+            if(HasPlayerWon(1))
+            {
+                m_macroBoard.MacroBoardStates[thisMicroBoardIndex] = 1;
+            }
+            else if (HasPlayerWon(2))
+            {
+                m_macroBoard.MacroBoardStates[thisMicroBoardIndex] = 2;
+            }
+        }
+
+        public bool HasPlayerWon(sbyte playerId)
+        {
+            //0,1,2
+            //3,4,5
+            //6,7,8
+
+            // Get the offsets
+            int xOffset = (int)m_thisBoardRow  * 3;
+            int yOffset = (int)m_thisBoardCol * 3;
+
+            // Check for the first row, first col, and the first diag
+            if (m_macroBoard.Slots[xOffset][yOffset] == playerId)
+            {
+                // Row
+                if (m_macroBoard.Slots[xOffset+1][yOffset] == playerId)
+                {
+                    if (m_macroBoard.Slots[xOffset +2][yOffset] == playerId)
+                    {
+                        return true;
+                    }
+                }
+                // Diag
+                if (m_macroBoard.Slots[xOffset + 1][yOffset + 1] == playerId)
+                {
+                    if (m_macroBoard.Slots[xOffset + 2 ][yOffset + 2] == playerId)
+                    {
+                        return true;
+                    }
+                }
+                // Col
+                if (m_macroBoard.Slots[xOffset][yOffset + 1] == playerId)
+                {
+                    if (m_macroBoard.Slots[xOffset][yOffset + 2] == playerId)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // Check for mid col
+            if (m_macroBoard.Slots[xOffset + 1][yOffset] == playerId)
+            {
+                if (m_macroBoard.Slots[xOffset + 1][yOffset + 1] == playerId)
+                {
+                    if (m_macroBoard.Slots[xOffset + 1][yOffset + 2] == playerId)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // Check for the last col
+            if (m_macroBoard.Slots[xOffset + 2][yOffset] == playerId)
+            {
+                if (m_macroBoard.Slots[xOffset + 2][yOffset + 1] == playerId)
+                {
+                    if (m_macroBoard.Slots[xOffset + 2][yOffset + 2] == playerId)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // Check for middle row
+            if (m_macroBoard.Slots[xOffset][yOffset + 1] == playerId)
+            {
+                if (m_macroBoard.Slots[xOffset + 1][yOffset + 1] == playerId)
+                {
+                    if (m_macroBoard.Slots[xOffset + 2][yOffset + 1] == playerId)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // Check for bottom row, and other diag
+            if (m_macroBoard.Slots[xOffset][yOffset + 2] == playerId)
+            {
+                if (m_macroBoard.Slots[xOffset + 1][yOffset + 2] == playerId)
+                {
+                    if (m_macroBoard.Slots[xOffset + 2][yOffset + 2] == playerId)
+                    {
+                        return true;
+                    }
+                }
+                if (m_macroBoard.Slots[xOffset + 1][yOffset + 1] == playerId)
+                {
+                    if (m_macroBoard.Slots[xOffset + 2][yOffset] == playerId)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        #endregion
     }
 }

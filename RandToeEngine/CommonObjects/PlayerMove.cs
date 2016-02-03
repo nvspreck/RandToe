@@ -17,5 +17,15 @@ namespace RandToeEngine.CommonObjects
         public int MacroX { get; }
 
         public int MacroY { get; }
+
+        public override bool Equals(Object obj)
+        {
+            // Check for null values and compare run-time types.
+            if (obj == null || GetType() != obj.GetType())
+                return false;
+
+            PlayerMove move = (PlayerMove)obj;
+            return (move.MacroX == this.MacroX) && (this.MacroY == move.MacroY);
+        }
     }
 }
