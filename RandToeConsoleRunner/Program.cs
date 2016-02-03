@@ -7,6 +7,7 @@ using RandToeEngine.Interfaces;
 using RandToeEngine;
 using System.IO;
 using System.Diagnostics;
+using RandToeEngine.Bots;
 
 namespace RandToeConsoleRunner
 {
@@ -41,12 +42,26 @@ namespace RandToeConsoleRunner
             // Sub to the logger
             PlayerBase.Logger.OnLogMessage += Logger_OnLogMessage;
 
+
+
+            string botName = "RandBot";
+            PlayerBase.Logger.Log(this, $"Making bot: {botName}");
+
+            // Make the bot
+            IPlayer playingBot = BotManager.GetBot(botName);
+
+            PlayerBase.Logger.Log(this, $"Bot Made");
+
+
+
             PlayerBase.Logger.Log(this, "Creating Engine");
 
             // Make the engine.
-            PlayerBase engine = new PlayerBase(this, null);
+            PlayerBase engine = new PlayerBase(this, playingBot);
 
             PlayerBase.Logger.Log(this, "Engine Created; Entering main loop");
+
+
 
             // The main loop
             while(true)

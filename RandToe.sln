@@ -3,13 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandToe", "RandToe.csproj", "{83E96518-C68F-4069-833F-81A86C3A1921}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandToe", "RandToe\RandToe.csproj", "{83E96518-C68F-4069-833F-81A86C3A1921}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandToeWeb", "..\RandToeWeb\RandToeWeb.csproj", "{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandToeConsoleRunner", "RandToeConsoleRunner\RandToeConsoleRunner.csproj", "{69A61566-90CA-4D51-BC04-0640714EA558}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandToeConsoleRunner", "..\RandToeConsoleRunner\RandToeConsoleRunner.csproj", "{69A61566-90CA-4D51-BC04-0640714EA558}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandToeEngine", "..\RandToeEngine\RandToeEngine.csproj", "{F2F298E9-2241-450C-AA64-432C48FFE1EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandToeEngine", "RandToeEngine\RandToeEngine.csproj", "{F2F298E9-2241-450C-AA64-432C48FFE1EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,22 +41,6 @@ Global
 		{83E96518-C68F-4069-833F-81A86C3A1921}.Release|x86.ActiveCfg = Release|x86
 		{83E96518-C68F-4069-833F-81A86C3A1921}.Release|x86.Build.0 = Release|x86
 		{83E96518-C68F-4069-833F-81A86C3A1921}.Release|x86.Deploy.0 = Release|x86
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Debug|ARM.Build.0 = Debug|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Debug|x64.Build.0 = Debug|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Debug|x86.Build.0 = Debug|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Release|ARM.ActiveCfg = Release|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Release|ARM.Build.0 = Release|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Release|x64.ActiveCfg = Release|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Release|x64.Build.0 = Release|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Release|x86.ActiveCfg = Release|Any CPU
-		{C19B3FEE-DA15-4FC8-97EF-DD27138590F0}.Release|x86.Build.0 = Release|Any CPU
 		{69A61566-90CA-4D51-BC04-0640714EA558}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{69A61566-90CA-4D51-BC04-0640714EA558}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69A61566-90CA-4D51-BC04-0640714EA558}.Debug|ARM.ActiveCfg = Debug|Any CPU
