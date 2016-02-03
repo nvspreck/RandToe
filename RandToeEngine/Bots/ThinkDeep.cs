@@ -17,18 +17,14 @@ namespace RandToeEngine.Bots
 
         public void MoveRequested(IPlayerBase playerBase)
         {
-            // MacroBoard newboard = engine.CurrentBoard.MakeCopy();
-
             sbyte[][] slots = playerBase.CurrentBoard.Slots;
             PlayerMove move = ComputeMove(ref slots, playerBase.CurrentBoard.MacroBoardStates);
+            playerBase.MakeMove(move);
         }
 
 
         private PlayerMove ComputeMove(ref sbyte[][] slots, sbyte[] macroboard)
         {
-
-            PrintBoardState(ref slots, macroboard, 0);
-
             int bestScore = 0;
             PlayerMove bestMove = null;
             for(int i = 0; i < 9; i++)
@@ -111,7 +107,7 @@ namespace RandToeEngine.Bots
             //lastTime = DateTime.Now;
 
            // RandToeEngineCore.Logger.Log(this,"Starting Level "+level);
-           if(level > 5)
+           if(level > 6)
             {
                 return 0;
             }
