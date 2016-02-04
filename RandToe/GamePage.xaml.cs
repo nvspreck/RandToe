@@ -36,6 +36,7 @@ namespace RandToe
 
     class GameRunner : IMoveCommandConsumer
     {
+        bool isGameOver = false;
 
         private bool IsLegalMove(int x, int y)
         {
@@ -115,17 +116,16 @@ namespace RandToe
             return stringArray.Substring(0, stringArray.Length - 1);
         }
 
-        private void EndGame()
-        {
-
-        }
-
         /// <summary>
         /// Called when someone wants to send the move command.
         /// </summary>
         /// <param name="moveCommand"></param>
         public void OnMakeMoveCommand(string moveCommand)
         {
+            if(isGameOver)
+            {
+                return;
+            }
 
             string commandLower = moveCommand.ToLower();
 
@@ -143,16 +143,22 @@ namespace RandToe
             if (IsLegalMove(x, y))
             {
                 MakeMove(x, y);
+
                 if (IsGameOver())
                 {
-                    EndGame();
-                }
-                else
-                {
-                    ToggleCurrentPlayer();
-                    UpdateMoveRound();
+                    // If the game is over set the flag but make one more
+                    // "move request" so the UI updates.
+                    isGameOver = true;
+
+                    // Send the move command to ensure the UI gets it.
                     SendMoveToCurrentPlayer();
+
+                    PlayerBase.Logger.Log(this, "~~~~~~~~  GAME OVER ~~~~~~~~~~~~~");
                 }
+
+                ToggleCurrentPlayer();
+                UpdateMoveRound();
+                SendMoveToCurrentPlayer();               
             }
         }
 
@@ -239,6 +245,11 @@ namespace RandToe
         /// </summary>
         PlayerBase m_player2;
 
+        /// <summary>
+        /// Keeps track of the last player base send to us.
+        /// </summary>
+        IPlayerBase m_lastPlayerBase;
+
         public GamePage()
         {
             this.InitializeComponent();
@@ -262,7 +273,6 @@ namespace RandToe
         {
             //Set up the game backend
             GameRunner gameRunner = new GameRunner();
-
 
             // Setup the human player
             PlayerBase humanPlayer = new PlayerBase(gameRunner, this);
@@ -321,6 +331,9 @@ namespace RandToe
         /// <param name="playerBase"></param>
         public async void MoveRequested(IPlayerBase playerBase)
         {
+            // Capture the player base.
+            m_lastPlayerBase = playerBase;
+
             await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
             {
                 // Set the player text
@@ -394,10 +407,13 @@ namespace RandToe
             // Return if we don't want input.
             if(!m_isWaitingOnInput)
             {
-                PlayerBase.Logger.Log(this, "User move ingored, waiting on the AI");
+                PlayerBase.Logger.Log(this, "User move ignored, waiting on the AI");
                 return;
             }
             m_isWaitingOnInput = false;
+
+            // Set the status text
+            ui_readyPlayerText.Text = $"Bot is thinking...";
 
             // Get the name
             Grid grid = (Grid)sender;
@@ -428,18 +444,6 @@ namespace RandToe
             });
         }
 
-
-        /// <summary>
-        /// Fired when the grid size is changed.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void MainGrid_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-
-
-        }
-
         /// <summary>
         /// Fired when there is a new logger message.
         /// </summary>
@@ -447,9 +451,11 @@ namespace RandToe
         /// <param name="formattedMessage"></param>
         private async void Logger_OnLogMessage(LogLevels level, string formattedMessage)
         {
-            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
+            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Low, async () =>
             {
                 ui_gameLog.Text += formattedMessage + Environment.NewLine;
+                await Task.Delay(5);
+                ui_gameLogScroller.ChangeView(null, ui_gameLog.ActualHeight, null);
             });
         }
 
@@ -458,6 +464,42 @@ namespace RandToe
             int size = (int)Math.Min(e.NewSize.Width, 500);
             ui_mainGrid.Height = size;
             ui_mainGrid.Width = size;
+        }
+
+        private void MakeThinkDeepPlay_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            // Return if we don't want input.
+            if (!m_isWaitingOnInput)
+            {
+                PlayerBase.Logger.Log(this, "User move ignored, waiting on the AI");
+                return;
+            }
+            m_isWaitingOnInput = false;
+
+            Task.Run(() =>
+            {
+                // This will figure out and make a move.
+                ThinkDeep bot = new ThinkDeep();
+                bot.MoveRequested(m_lastPlayerBase);
+            });
+        }
+
+        private void MakeRandBotPlay_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            // Return if we don't want input.
+            if (!m_isWaitingOnInput)
+            {
+                PlayerBase.Logger.Log(this, "User move ignored, waiting on the AI");
+                return;
+            }
+            m_isWaitingOnInput = false;
+
+            Task.Run(() =>
+            {
+                // This will figure out and make a move.
+                RandBot bot = new RandBot();
+                bot.MoveRequested(m_lastPlayerBase);
+            });
         }
     }
 }

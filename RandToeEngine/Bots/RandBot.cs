@@ -12,7 +12,7 @@ namespace RandToeEngine.Bots
     /// <summary>
     /// The best bot ever. Random.
     /// </summary>
-    class RandBot : IPlayer
+    public class RandBot : IPlayer
     {
         /// <summary>
         /// Called when we should make a move.

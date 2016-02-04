@@ -11,6 +11,7 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
 
         <TextBlock x:Name="ui_readyPlayerText"
@@ -1149,8 +1150,18 @@
                       Background="#22000000"
                       HorizontalScrollBarVisibility="Visible"
                       HorizontalScrollMode="Enabled"
-                      VerticalScrollMode="Auto">
+                      VerticalScrollMode="Auto" x:Name="ui_gameLogScroller">
             <TextBlock x:Name="ui_gameLog" />
         </ScrollViewer>
+
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" HorizontalAlignment="Stretch" Content="Let RandBot Play For Me" Tapped="MakeRandBotPlay_Tapped" Margin="12" />
+            <Button Grid.Column="1" HorizontalAlignment="Stretch" Content="Let ThinkDeep Play For Me" Tapped="MakeThinkDeepPlay_Tapped" Margin="12" />
+        </Grid>
     </Grid>
 </Page>
