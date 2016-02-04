@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RandToeEngine.Bots
@@ -37,30 +38,42 @@ namespace RandToeEngine.Bots
         /// <param name="playerBase"></param>
         public void MoveRequested(IPlayerBase playerBase)
         {
-            //  Setup
+            // Setup
             m_myPlayValue = playerBase.PlayerId;
             m_theirPlayValue = m_myPlayValue == 1 ? (sbyte)2 : (sbyte)1;
 
-            // Special case, if this is the first move pick 0
+            // Special case, if this is the first move pick the middle middle
             if(playerBase.HistoricMoves.Count == 0)
             {
                 playerBase.MakeMove(new PlayerMove(4,4));
                 return;
             }
 
-            // Look for a block
-            // TODO
-
             // Grab the time
-            DateTime startTime = DateTime.Now;
+            m_numberOfMovesChecked = 0;
+            DateTime startTime = DateTime.Now;            
 
-            // Pick a space
+            // Find the move.
             sbyte[][] slots = playerBase.CurrentBoard.Slots;
-            PlayerMove move = ComputeMove(ref slots, playerBase.CurrentBoard.MacroBoardStates, 4);
+            PlayerMove move = ComputeMove(ref slots, playerBase.CurrentBoard.MacroBoardStates, 5);
 
             // Grab the end time
             TimeSpan diff = DateTime.Now - startTime;
-            PlayerBase.Logger.Log(this, $"Entire round compute took ({diff.TotalMilliseconds}ms)");
+
+            // Compute time per move.
+            double timePerValue = diff.TotalMilliseconds / m_numberOfMovesChecked;
+
+            // Update the average
+            if (m_averageTimePerMove == 0)
+            {
+                m_averageTimePerMove = timePerValue;
+            }
+            else
+            {
+                m_averageTimePerMove = (m_averageTimePerMove * .90) + (timePerValue * .10);
+            }
+
+            PlayerBase.Logger.Log(this, $"Total move calcuation done; time ({diff.TotalMilliseconds}ms), computed values ({m_numberOfMovesChecked}), time per value ({timePerValue}), new average({m_averageTimePerMove})");
 
             // Make the move
             playerBase.MakeMove(move);
@@ -72,16 +85,19 @@ namespace RandToeEngine.Bots
         {
             int bestScore = int.MinValue;
             List<PlayerMove> bestMoves = new List<PlayerMove>();
+            int numberOfTasks = 0;
+            int numberOfTasksDone = 0;
+            ManualResetEvent doneEvent = new ManualResetEvent(false);
 
             // Loop through each macroboard we can play on.
-            for(int i = 0; i < 9; i++)
+            for(int macroBoardCount = 0; macroBoardCount < 9; macroBoardCount++)
             {
                 // If it is playable...
-                if(macroboard[i] == -1)
+                if(macroboard[macroBoardCount] == -1)
                 {
                     // Compute the offset.
-                    int xOffset = (int)i % 3 * 3;
-                    int yOffset = (int)Math.Floor(i / 3.0) * 3;
+                    int xOffset = (int)macroBoardCount % 3 * 3;
+                    int yOffset = (int)Math.Floor(macroBoardCount / 3.0) * 3;
 
                     // Loop through it's spaces.
                     for (int y = 0; y < 3; y++)
@@ -89,89 +105,75 @@ namespace RandToeEngine.Bots
                         for(int x = 0; x < 3; x++)
                         {
                             int macroX = x + xOffset;
-                            int macroY = y + yOffset;
+                            int macroY = y + yOffset;                           
 
                             // If the slot isn't taken...
                             if (slots[macroX][macroY] == 0)
                             {
-                                // Make the move
-                                slots[macroX][macroY] = m_myPlayValue;
-
-                                // Update the macro
-                                sbyte[] newMacroBoard = new sbyte[9];
-                                Array.Copy(macroboard, newMacroBoard, 9);
-
-                                // If we didn't win the game we need to update the macro boards, figure out where we were sent.
-                                int sendToMicroBoardIndex = x + y * 3;
-
-                                // Figure out what our replace value is, if the board is won we will replace with -1.
-                                sbyte newReplaceValue = (newMacroBoard[sendToMicroBoardIndex] == 1 || newMacroBoard[sendToMicroBoardIndex] == 2) ? (sbyte)-1 : (sbyte)0;
-
-                                // Loop through the values
-                                for (int c = 0; c < 9; c++)
+                                // Make a copy of the data for this thread.
+                                sbyte[][] localSlots = new sbyte[9][];
+                                for(int b = 0; b < 9; b++)
                                 {
-                                    // If the board isn't won
-                                    if (newMacroBoard[c] != 1 && newMacroBoard[c] != 2)
+                                    localSlots[b] = new sbyte[9];
+                                    Array.Copy(slots[b], localSlots[b], 9);
+                                }
+                                sbyte[] localMacroblockState = new sbyte[9];
+                                Array.Copy(macroboard, localMacroblockState, 9);
+                                int localX = x;
+                                int localY = y;
+                                int localMacroBlockCount = macroBoardCount;
+                                int localMacroX = macroX;
+                                int localMacroY = macroY;
+
+                                // Put the work in a task to be executed.
+                                numberOfTasks++;
+                                Task.Run(() =>
+                                {
+                                    // Setup up
+                                    int moveScore = 0;
+                                    DateTime begin = DateTime.Now;
+
+                                    // Do the move logic.
+                                    DoMoveLogic(ref localSlots, ref localMacroblockState, ref moveScore, localX, localY, localMacroBlockCount, true, 0, maxDepth);            
+
+                                    // Get the time now.
+                                    DateTime end = DateTime.Now;
+                                    TimeSpan diff = end - begin;                     
+
+                                    // Log
+                                    PlayerBase.Logger.Log(this, $"Move ({localX},{localY})[{localMacroX},{localMacroY}] Computed; Score ({moveScore}), Time ({diff.TotalMilliseconds}ms)");
+
+                                    // If this is equal to the current top score pick at random.
+                                    lock(bestMoves)
                                     {
-                                        // If we are at the board we are looking for.
-                                        if (c == sendToMicroBoardIndex)
+                                        if (moveScore == bestScore)
                                         {
-                                            newMacroBoard[c] = -1;
+                                            bestMoves.Add(new PlayerMove(localMacroX, localMacroY));
+                                            bestScore = moveScore;
                                         }
-                                        else
+                                        // If this score is better clear the past list and add this one.
+                                        else if (moveScore > bestScore)
                                         {
-                                            // Set the default value
-                                            newMacroBoard[c] = newReplaceValue;
+                                            bestMoves.Clear();
+                                            bestMoves.Add(new PlayerMove(localMacroX, localMacroY));
+                                            bestScore = moveScore;
                                         }
+
+                                        // Set that we are done
+                                        numberOfTasksDone++;
+                                        doneEvent.Set();
                                     }
-                                }
-
-                                // Reset moves checked and get the time.
-                                m_numberOfMovesChecked = 0;
-                                DateTime begin = DateTime.Now;
-
-                                // Make moves
-                                int score = RecursiveMove(ref slots, newMacroBoard, false, 0, maxDepth);
-
-                                // Get the time now.
-                                DateTime end = DateTime.Now;
-                                TimeSpan diff = end - begin;
-                                double timePerMove = diff.TotalMilliseconds / m_numberOfMovesChecked;
-
-                                // Update the average
-                                if(m_averageTimePerMove == 0)
-                                {
-                                    m_averageTimePerMove = timePerMove;
-                                }
-                                else
-                                {
-                                    m_averageTimePerMove = (m_averageTimePerMove * .90) + (timePerMove * .10);
-                                }
-
-                                // Log
-                                PlayerBase.Logger.Log(this, $"Move Computed; Score ({score}), values computed ({m_numberOfMovesChecked}), time ({diff.TotalMilliseconds}), time per value ({timePerMove}), new time per value average ({m_averageTimePerMove})");
-
-
-                                // If this is equal to the current top score pick at random.
-                                if (score == bestScore)
-                                {
-                                    bestMoves.Add(new PlayerMove(macroX, macroY));
-                                    bestScore = score;
-                                }
-                                // If this score is better clear the past list and add this one.
-                                else if(score > bestScore)
-                                {
-                                    bestMoves.Clear();
-                                    bestMoves.Add(new PlayerMove(macroX, macroY));
-                                    bestScore = score;
-                                }
-
-                                // Reset the board
-                                slots[macroX][macroY] = 0;
+                                });
                             }
                         }
                     }
                 }
+            }
+
+            // Wait for the tasks to finish.
+            while(numberOfTasks != numberOfTasksDone)
+            {
+                doneEvent.WaitOne(50);
             }
 
             // Pick the first move.
@@ -183,7 +185,9 @@ namespace RandToeEngine.Bots
                 // Check for a center value, if we have one play it
                 foreach(PlayerMove move in bestMoves)
                 {
-                    if(move.MacroX == 1 && move.MacroY == 1)
+                    PlayerBase.Logger.Log(this, $"Best Move Tied ({move.MacroX},{move.MacroY}); score ({bestScore})");
+
+                    if (move.MacroX == 1 && move.MacroY == 1)
                     {
                         selectedMove = move;
                         break;
@@ -239,16 +243,15 @@ namespace RandToeEngine.Bots
             }
 
             // If we don't have a move yet pick the first one.
-            if(selectedMove == null)
+            if (selectedMove == null)
             {
                 selectedMove = bestMoves.First<PlayerMove>();
             }
 
+            PlayerBase.Logger.Log(this, $"Best Move Selected ({selectedMove.MacroX},{selectedMove.MacroY}); score ({bestScore})");
+
             return selectedMove;
         }
-
-        DateTime lastTime = DateTime.Now;
-        double average = 0;
 
         private int RecursiveMove(ref sbyte[][] slots, sbyte[] macroboard, bool isMyTurn, int currentDepth, int maxDepth)
         {
@@ -262,257 +265,18 @@ namespace RandToeEngine.Bots
             int scoreForMove = 0;
 
             // Loop though all macroblocks
-            for (int i = 0; i < 9; i++)
+            for (int macroBlock = 0; macroBlock < 9; macroBlock++)
             {
                 // If it is playable
-                if (macroboard[i] == -1)
+                if (macroboard[macroBlock] == -1)
                 {
-                    // Compute the offset.
-                    int xOffset = (int)i % 3 * 3;
-                    int yOffset = (int)Math.Floor(i / 3.0) * 3;
-
                     // Loop through the spaces
                     for (int y = 0; y < 3; y++)
                     {
                         for (int x = 0; x < 3; x++)
                         {
-                            int macroX = x + xOffset;
-                            int macroY = y + yOffset;
-
-                            // If the space is free...
-                            if (slots[macroX][macroY] == 0)
-                            {
-                                m_numberOfMovesChecked++;
-                                // Make the move
-                                sbyte playedValue = (sbyte)(isMyTurn ? m_myPlayValue : m_theirPlayValue);
-                                slots[macroX][macroY] = playedValue;
-
-                                // Make a copy of the macroboard so we can update it.
-                                sbyte[] newMacroBoard = new sbyte[9];
-                                Array.Copy(macroboard, newMacroBoard, 9);
-
-                                // Check for a new micro win, note the only new win can be this player id since
-                                // it is the only thing that changed.
-
-                                // Check for the first row, first col, and the first diag
-                                bool microWinFound = false;
-                                if (slots[xOffset][yOffset] == playedValue)
-                                {
-                                    // Row
-                                    if (slots[xOffset + 1][yOffset] == playedValue)
-                                    {
-                                        if (slots[xOffset + 2][yOffset] == playedValue)
-                                        {
-                                            microWinFound = true;
-                                        }
-                                    }
-                                    // Diag
-                                    if (slots[xOffset + 1][yOffset + 1] == playedValue)
-                                    {
-                                        if (slots[xOffset + 2][yOffset + 2] == playedValue)
-                                        {
-                                            microWinFound = true;
-                                        }
-                                    }
-                                    // Col
-                                    if (slots[xOffset][yOffset + 1] == playedValue)
-                                    {
-                                        if (slots[xOffset][yOffset + 2] == playedValue)
-                                        {
-                                            microWinFound = true;
-                                        }
-                                    }
-                                }
-
-                                // Check for mid col
-                                if (slots[xOffset + 1][yOffset] == playedValue)
-                                {
-                                    if (slots[xOffset + 1][yOffset + 1] == playedValue)
-                                    {
-                                        if (slots[xOffset + 1][yOffset + 2] == playedValue)
-                                        {
-                                            microWinFound = true;
-                                        }
-                                    }
-                                }
-
-                                // Check for the last col
-                                if (slots[xOffset + 2][yOffset] == playedValue)
-                                {
-                                    if (slots[xOffset + 2][yOffset + 1] == playedValue)
-                                    {
-                                        if (slots[xOffset + 2][yOffset + 2] == playedValue)
-                                        {
-                                            microWinFound = true;
-                                        }
-                                    }
-                                }
-
-                                // Check for middle row
-                                if (slots[xOffset][yOffset + 1] == playedValue)
-                                {
-                                    if (slots[xOffset + 1][yOffset + 1] == playedValue)
-                                    {
-                                        if (slots[xOffset + 2][yOffset + 1] == playedValue)
-                                        {
-                                            microWinFound = true;
-                                        }
-                                    }
-                                }
-
-                                // Check for bottom row, and other diag
-                                if (slots[xOffset][yOffset + 2] == playedValue)
-                                {
-                                    if (slots[xOffset + 1][yOffset + 2] == playedValue)
-                                    {
-                                        if (slots[xOffset + 2][yOffset + 2] == playedValue)
-                                        {
-                                            microWinFound = true;
-                                        }
-                                    }
-                                    if (slots[xOffset + 1][yOffset + 1] == playedValue)
-                                    {
-                                        if (slots[xOffset + 2][yOffset] == playedValue)
-                                        {
-                                            microWinFound = true;
-                                        }
-                                    }
-                                }
-
-                                if (microWinFound)
-                                {
-                                    // If we have a winner now set it.
-                                    newMacroBoard[i] = playedValue;
-
-                                    // Update the score for this round,
-                                    // just a small indication that this is good or bad.
-                                    double scoreScale = (playedValue == m_myPlayValue ? 1 : -1)  * currentDepth;
-                                    scoreForMove += (int)(10 / scoreScale);
-
-
-                                    // Now check for a macro win.
-                                    bool hasMacroWin = false;
-                                    if (newMacroBoard[0] == playedValue)
-                                    {
-                                        if (newMacroBoard[1] == playedValue)
-                                        {
-                                            if (newMacroBoard[2] == playedValue)
-                                            {
-                                                hasMacroWin = true;
-                                            }
-                                        }
-                                        if (newMacroBoard[4] == playedValue)
-                                        {
-                                            if (newMacroBoard[8] == playedValue)
-                                            {
-                                                hasMacroWin = true;
-                                            }
-                                        }
-                                        if (newMacroBoard[3] == playedValue)
-                                        {
-                                            if (newMacroBoard[6] == playedValue)
-                                            {
-                                                hasMacroWin = true;
-                                            }
-                                        }
-                                    }
-
-                                    if (newMacroBoard[1] == playedValue)
-                                    {
-                                        if (newMacroBoard[4] == playedValue)
-                                        {
-                                            if (newMacroBoard[7] == playedValue)
-                                            {
-                                                hasMacroWin = true;
-                                            }
-                                        }
-                                    }
-
-                                    if (newMacroBoard[2] == playedValue)
-                                    {
-                                        if (newMacroBoard[5] == playedValue)
-                                        {
-                                            if (newMacroBoard[8] == playedValue)
-                                            {
-                                                hasMacroWin = true;
-                                            }
-                                        }
-                                    }
-
-                                    if (newMacroBoard[3] == playedValue)
-                                    {
-                                        if (newMacroBoard[4] == playedValue)
-                                        {
-                                            if (newMacroBoard[5] == playedValue)
-                                            {
-                                                hasMacroWin = true;
-                                            }
-                                        }
-                                    }
-
-                                    if (newMacroBoard[6] == playedValue)
-                                    {
-                                        if (newMacroBoard[7] == playedValue)
-                                        {
-                                            if (newMacroBoard[8] == playedValue)
-                                            {
-                                                hasMacroWin = true;
-                                            }
-                                        }
-                                        if (newMacroBoard[4] == playedValue)
-                                        {
-                                            if (newMacroBoard[2] == playedValue)
-                                            {
-                                                hasMacroWin = true;
-                                            }
-                                        }
-                                    }
-
-                                    if (hasMacroWin)
-                                    {
-                                        // Update the score to indicate someone won.
-                                        scoreForMove += (int)(100/ scoreScale);
-
-                                        // Reset the macroboard slot
-                                        slots[macroX][macroY] = 0;
-
-                                        // Return now, since they would make this move.
-                                        return scoreForMove;
-                                    }
-                                }
-
-                                // If we didn't win the game we need to update the macro boards, figure out where we were sent.
-                                int sendToMicroBoardIndex = x + y * 3;
-
-                                // Figure out what our replace value is, if the board is won we will replace with -1.
-                                sbyte newReplaceValue = (newMacroBoard[sendToMicroBoardIndex] == 1 || newMacroBoard[sendToMicroBoardIndex] == 2) ? (sbyte)-1 : (sbyte)0;
-
-                                // Loop through the values
-                                for (int c = 0; c < 9; c++)
-                                {
-                                    // If the board isn't won
-                                    if(newMacroBoard[c] != 1 && newMacroBoard[c] != 2)
-                                    {
-                                        // If we are at the board we are looking for.
-                                        if (c == sendToMicroBoardIndex)
-                                        {
-                                            newMacroBoard[c] = -1;
-                                        }
-                                        else
-                                        {
-                                            // Set the default value
-                                            newMacroBoard[c] = newReplaceValue;
-                                        }
-                                    }
-                                }
-
-                                // Make the move
-                                int nextDepth = currentDepth + 1;
-                                scoreForMove += RecursiveMove(ref slots, newMacroBoard, !isMyTurn, nextDepth, maxDepth);
-
-                                // Reset the board
-                                slots[macroX][macroY] = 0;
-                            }
+                            // Try to make a move
+                            DoMoveLogic(ref slots, ref macroboard, ref scoreForMove, x, y, macroBlock, isMyTurn, currentDepth, maxDepth);
                         }
                     }
                 }
@@ -522,8 +286,282 @@ namespace RandToeEngine.Bots
             return scoreForMove;
         }
 
-        #endregion
+        private bool DoMoveLogic(ref sbyte[][] slots, ref sbyte[] macroboard, ref int scoreForMove, int microX, int microY, int macroblockNumber, bool isMyTurn, int currentDepth, int maxDepth)
+        {
+            // Indicate we have checked a move.
+            m_numberOfMovesChecked++;
 
+            // Compute the offset.
+            int xOffset = (int)macroblockNumber % 3 * 3;
+            int yOffset = (int)Math.Floor(macroblockNumber / 3.0) * 3;
+            int macroX = microX + xOffset;
+            int macroY = microY + yOffset;
+
+            // Check to make sure we can play this space.
+            if (slots[macroX][macroY] != 0)
+            {
+                return false;
+            }
+
+            // Make the move
+            sbyte playedValue = (sbyte)(isMyTurn ? m_myPlayValue : m_theirPlayValue);
+            slots[macroX][macroY] = playedValue;
+
+            // Make a copy of the macroboard so we can update it.
+            sbyte[] newMacroBoard = new sbyte[9];
+            Array.Copy(macroboard, newMacroBoard, 9);
+
+            // Check for a new micro win, note the only new win can be this player id since
+            // it is the only thing that changed. 
+
+            // Check for the first row, first col, and the first diag
+            bool microWinFound = false;
+            if (slots[xOffset][yOffset] == playedValue)
+            {
+                // Row
+                if (slots[xOffset + 1][yOffset] == playedValue)
+                {
+                    if (slots[xOffset + 2][yOffset] == playedValue)
+                    {
+                        microWinFound = true;
+                    }
+                }
+                // Diag
+                if (slots[xOffset + 1][yOffset + 1] == playedValue)
+                {
+                    if (slots[xOffset + 2][yOffset + 2] == playedValue)
+                    {
+                        microWinFound = true;
+                    }
+                }
+                // Col
+                if (slots[xOffset][yOffset + 1] == playedValue)
+                {
+                    if (slots[xOffset][yOffset + 2] == playedValue)
+                    {
+                        microWinFound = true;
+                    }
+                }
+            }
+
+            // Check for mid col
+            if (slots[xOffset + 1][yOffset] == playedValue)
+            {
+                if (slots[xOffset + 1][yOffset + 1] == playedValue)
+                {
+                    if (slots[xOffset + 1][yOffset + 2] == playedValue)
+                    {
+                        microWinFound = true;
+                    }
+                }
+            }
+
+            // Check for the last col
+            if (slots[xOffset + 2][yOffset] == playedValue)
+            {
+                if (slots[xOffset + 2][yOffset + 1] == playedValue)
+                {
+                    if (slots[xOffset + 2][yOffset + 2] == playedValue)
+                    {
+                        microWinFound = true;
+                    }
+                }
+            }
+
+            // Check for middle row
+            if (slots[xOffset][yOffset + 1] == playedValue)
+            {
+                if (slots[xOffset + 1][yOffset + 1] == playedValue)
+                {
+                    if (slots[xOffset + 2][yOffset + 1] == playedValue)
+                    {
+                        microWinFound = true;
+                    }
+                }
+            }
+
+            // Check for bottom row, and other diag
+            if (slots[xOffset][yOffset + 2] == playedValue)
+            {
+                if (slots[xOffset + 1][yOffset + 2] == playedValue)
+                {
+                    if (slots[xOffset + 2][yOffset + 2] == playedValue)
+                    {
+                        microWinFound = true;
+                    }
+                }
+                if (slots[xOffset + 1][yOffset + 1] == playedValue)
+                {
+                    if (slots[xOffset + 2][yOffset] == playedValue)
+                    {
+                        microWinFound = true;
+                    }
+                }
+            }
+
+            if (microWinFound)
+            {
+                // If we have a winner now set it.
+                newMacroBoard[macroblockNumber] = playedValue;
+
+                // Calculate the scale for this depth
+                double scoreScale = (isMyTurn ? 1 : -1) * Math.Pow(2, currentDepth);
+
+                // Special case, if the depth is 0 this is our move. If we can win do it.
+                if (currentDepth == 0 && isMyTurn)
+                {
+                    // If so, set the scale to be small so the odds we pick this move are very large.
+                    scoreScale = .0005;
+                }
+                // If the depth is 1 it is their turn, if we found a win make this path look bad.
+                else if (currentDepth == 1 && !isMyTurn)
+                {
+                    scoreScale = -.001;
+                }
+
+                // Update the score for this round,
+                // just a small indication that this is good or bad.
+                scoreForMove += (int)(100 / scoreScale);
+
+                // Now check for a macro win.
+                bool hasMacroWin = false;
+                if (newMacroBoard[0] == playedValue)
+                {
+                    if (newMacroBoard[1] == playedValue)
+                    {
+                        if (newMacroBoard[2] == playedValue)
+                        {
+                            hasMacroWin = true;
+                        }
+                    }
+                    if (newMacroBoard[4] == playedValue)
+                    {
+                        if (newMacroBoard[8] == playedValue)
+                        {
+                            hasMacroWin = true;
+                        }
+                    }
+                    if (newMacroBoard[3] == playedValue)
+                    {
+                        if (newMacroBoard[6] == playedValue)
+                        {
+                            hasMacroWin = true;
+                        }
+                    }
+                }
+
+                if (newMacroBoard[1] == playedValue)
+                {
+                    if (newMacroBoard[4] == playedValue)
+                    {
+                        if (newMacroBoard[7] == playedValue)
+                        {
+                            hasMacroWin = true;
+                        }
+                    }
+                }
+
+                if (newMacroBoard[2] == playedValue)
+                {
+                    if (newMacroBoard[5] == playedValue)
+                    {
+                        if (newMacroBoard[8] == playedValue)
+                        {
+                            hasMacroWin = true;
+                        }
+                    }
+                }
+
+                if (newMacroBoard[3] == playedValue)
+                {
+                    if (newMacroBoard[4] == playedValue)
+                    {
+                        if (newMacroBoard[5] == playedValue)
+                        {
+                            hasMacroWin = true;
+                        }
+                    }
+                }
+
+                if (newMacroBoard[6] == playedValue)
+                {
+                    if (newMacroBoard[7] == playedValue)
+                    {
+                        if (newMacroBoard[8] == playedValue)
+                        {
+                            hasMacroWin = true;
+                        }
+                    }
+                    if (newMacroBoard[4] == playedValue)
+                    {
+                        if (newMacroBoard[2] == playedValue)
+                        {
+                            hasMacroWin = true;
+                        }
+                    }
+                }
+
+                if (hasMacroWin)
+                {
+                    // Update the score to indicate someone won.
+                    scoreForMove += (int)(10000 / scoreScale);
+
+                    // Special case, if the depth is 0 this is our move. If we can win do it.
+                    if (currentDepth == 0 && isMyTurn)
+                    {
+                        scoreForMove = int.MaxValue;
+                    }
+                    // If the depth is 1 it is their turn. We never want to send them somewhere
+                    // they can win.
+                    else if (currentDepth == 1 && !isMyTurn)
+                    {
+                        scoreScale = int.MinValue;
+                    }
+
+                    // Reset the macroboard slot
+                    slots[macroX][macroY] = 0;
+
+                    // Return now, since they would make this move.
+                    return true;
+                }
+            }
+
+            // If we didn't win the game we need to update the macro boards, figure out where we were sent.
+            int sendToMicroBoardIndex = microX + microY * 3;
+
+            // Figure out what our replace value is, if the board is won we will replace with -1.
+            sbyte newReplaceValue = (newMacroBoard[sendToMicroBoardIndex] == 1 || newMacroBoard[sendToMicroBoardIndex] == 2) ? (sbyte)-1 : (sbyte)0;
+
+            // Loop through the values
+            for (int c = 0; c < 9; c++)
+            {
+                // If the board isn't won
+                if (newMacroBoard[c] != 1 && newMacroBoard[c] != 2)
+                {
+                    // If we are at the board we are looking for.
+                    if (c == sendToMicroBoardIndex)
+                    {
+                        newMacroBoard[c] = -1;
+                    }
+                    else
+                    {
+                        // Set the default value
+                        newMacroBoard[c] = newReplaceValue;
+                    }
+                }
+            }
+
+            // Make the move
+            int nextDepth = currentDepth + 1;
+            scoreForMove += RecursiveMove(ref slots, newMacroBoard, !isMyTurn, nextDepth, maxDepth);
+
+            // Reset the board
+            slots[macroX][macroY] = 0;
+
+            return false;
+        }
+
+        #endregion
 
         #region Breadth first
 
