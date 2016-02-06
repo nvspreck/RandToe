@@ -1,2 +1,2 @@
-MainPackage=C:\Users\quinn\Repos\RandToe\RandToe\bin\x64\Release\RandToe_1.0.0.0_x64.appx
-SymbolPackage=C:\Users\quinn\OneDrive\RandToeBuilds\RandToe_1.0.0.0_Test\RandToe_1.0.0.0_x64.appxsym
+MainPackage=C:\Users\quinn\Repos\RandToe\RandToe\bin\x64\Release\RandToe_1.0.2.0_x64.appx
+SymbolPackage=D:\Users\Quinn\OneDrive\RandToeBuilds\RandToe_1.0.2.0_Test\RandToe_1.0.2.0_x64.appxsym

@@ -21,6 +21,7 @@
     <AppxPackageDir>D:\Users\Quinn\OneDrive\RandToeBuilds\</AppxPackageDir>
     <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
+    <PackageCertificateThumbprint>786397394E93C311876FA5153265F5E156B6CDA9</PackageCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
