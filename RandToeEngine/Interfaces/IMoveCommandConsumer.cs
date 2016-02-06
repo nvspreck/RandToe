@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RandToeEngine.Interfaces
+namespace RandToe
 {
     public interface IMoveCommandConsumer
     {

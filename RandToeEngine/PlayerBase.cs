@@ -1,13 +1,12 @@
-﻿using RandToeEngine.Interfaces;
+﻿using RandToe;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RandToeEngine.CommonObjects;
 
-namespace RandToeEngine
+namespace RandToe
 {
     /// <summary>
     /// The base logic for any player

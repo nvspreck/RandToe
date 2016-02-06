@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RandToeEngine.Interfaces;
-using RandToeEngine;
+using RandToeConsoleRunner;
 using System.IO;
 using System.Diagnostics;
-using RandToeEngine.Bots;
+using RandToe;
 
 namespace RandToeConsoleRunner
 {

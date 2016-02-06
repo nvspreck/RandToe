@@ -18,7 +18,7 @@
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PackageCertificateKeyFile>RandToe_TemporaryKey.pfx</PackageCertificateKeyFile>
     <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
-    <AppxPackageDir>C:\Users\quinn\OneDrive\RandToeBuilds\</AppxPackageDir>
+    <AppxPackageDir>D:\Users\Quinn\OneDrive\RandToeBuilds\</AppxPackageDir>
     <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
   </PropertyGroup>
@@ -148,12 +148,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\RandToeEngine\RandToeEngine.csproj">
-      <Project>{f2f298e9-2241-450c-aa64-432c48ffe1ec}</Project>
-      <Name>RandToeEngine</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <Import Project="..\RandToeEngine\RandToeEngine.projitems" Label="Shared" />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

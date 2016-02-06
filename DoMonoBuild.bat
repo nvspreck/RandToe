@@ -1,0 +1,1 @@
+"C:\Program Files (x86)\Mono\bin\dmcs.bat" *.cs
