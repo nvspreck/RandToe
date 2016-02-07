@@ -54,7 +54,8 @@ namespace RandToe
 
             // Find the move.
             sbyte[][] slots = playerBase.CurrentBoard.Slots;
-            PlayerMove move = ComputeMove(ref slots, playerBase.CurrentBoard.MacroBoardStates, 5);
+            // Todo restore depth when I can thread.
+            PlayerMove move = ComputeMove(ref slots, playerBase.CurrentBoard.MacroBoardStates, 4);
 
             // Grab the end time
             TimeSpan diff = DateTime.Now - startTime;
@@ -72,7 +73,7 @@ namespace RandToe
                 m_averageTimePerMove = (m_averageTimePerMove * .90) + (timePerValue * .10);
             }
 
-            PlayerBase.Logger.Log(this, $"Total move calcuation done; time ({diff.TotalMilliseconds}ms), computed values ({m_numberOfMovesChecked}), time per value ({timePerValue}), new average({m_averageTimePerMove})");
+            PlayerBase.Logger.Log(this, "Total move calcuation done; time ("+diff.TotalMilliseconds+"ms), computed values ("+m_numberOfMovesChecked+"), time per value ("+timePerValue+"), new average("+m_averageTimePerMove+")");
 
             // Make the move
             playerBase.MakeMove(move);
@@ -126,7 +127,9 @@ namespace RandToe
 
                                 // Put the work in a task to be executed.
                                 numberOfTasks++;
-                                Task.Run(() =>
+
+                                // Todo enable threading.
+                                //Task.Run(() =>
                                 {
                                     // Setup up
                                     int moveScore = 0;
@@ -140,7 +143,7 @@ namespace RandToe
                                     TimeSpan diff = end - begin;                     
 
                                     // Log
-                                    PlayerBase.Logger.Log(this, $"Move ({localX},{localY})[{localMacroX},{localMacroY}] Computed; Score ({moveScore}), Time ({diff.TotalMilliseconds}ms)");
+                                    PlayerBase.Logger.Log(this, "Move ("+localX+","+localY+")["+localMacroX+","+localMacroY+"] Computed; Score ("+moveScore+"), Time ("+diff.TotalMilliseconds+"ms)");
 
                                     // If this is equal to the current top score pick at random.
                                     lock(bestMoves)
@@ -162,7 +165,7 @@ namespace RandToe
                                         numberOfTasksDone++;
                                         doneEvent.Set();
                                     }
-                                });
+                                }//);
                             }
                         }
                     }
@@ -184,7 +187,7 @@ namespace RandToe
                 // Check for a center value, if we have one play it
                 foreach(PlayerMove move in bestMoves)
                 {
-                    PlayerBase.Logger.Log(this, $"Best Move Tied ({move.MacroX},{move.MacroY}); score ({bestScore})");
+                    PlayerBase.Logger.Log(this, "Best Move Tied ("+move.MacroX+","+move.MacroY+"); score ("+bestScore+")");
 
                     if (move.MacroX == 1 && move.MacroY == 1)
                     {
@@ -247,7 +250,7 @@ namespace RandToe
                 selectedMove = bestMoves.First<PlayerMove>();
             }
 
-            PlayerBase.Logger.Log(this, $"Best Move Selected ({selectedMove.MacroX},{selectedMove.MacroY}); score ({bestScore})");
+            PlayerBase.Logger.Log(this, "Best Move Selected ("+selectedMove.MacroX+","+selectedMove.MacroY+"); score ("+bestScore+")");
 
             return selectedMove;
         }
@@ -629,7 +632,7 @@ namespace RandToe
             // Now our initial list is ready, start the move computation.
             ComputeMoveBreadth(initalList, ref moveScoreList);
 
-            PlayerBase.Logger.Log(this, $"moves checked ({m_numberOfMovesChecked}) time ({(DateTime.Now - begin).TotalMilliseconds}) time per move ({(DateTime.Now - begin).TotalMilliseconds / m_numberOfMovesChecked})");
+            PlayerBase.Logger.Log(this, "moves checked ("+m_numberOfMovesChecked+") time ("+(DateTime.Now - begin).TotalMilliseconds+") time per move ("+(DateTime.Now - begin).TotalMilliseconds / m_numberOfMovesChecked+")");
 
 
             // Now pick the best move based on the scores
@@ -862,14 +865,14 @@ namespace RandToe
             // print for debug
             for (int print = 0; print < 9; print++)
             {
-                Debug.WriteLine($"{slots[0][print]} {slots[1][print]}  {slots[2][print]} | {slots[3][print]}  {slots[4][print]}  {slots[5][print]} | {slots[6][print]} {slots[7][print]}  {slots[8][print]} ");
+                Debug.WriteLine(""+slots[0][print]+" "+slots[1][print]+"  "+slots[2][print]+" | "+slots[3][print]+"  "+slots[4][print]+"  "+slots[5][print]+" | "+slots[6][print]+" "+slots[7][print]+"  "+slots[8][print]+" ");
                 if (print == 2 || print == 5)
-                {
+                { 
                     Debug.WriteLine("----------------------------------------------");
                 }
             }
             Debug.WriteLine("----------------------------------------------");
-            Debug.WriteLine($"Macro State: {newMacro[0]},{newMacro[1]},{newMacro[2]},{newMacro[3]},{newMacro[4]},{newMacro[5]},{newMacro[6]},{newMacro[7]},{newMacro[8]}");
+            Debug.WriteLine("Macro State: "+newMacro[0]+","+newMacro[1]+","+newMacro[2]+","+newMacro[3]+","+newMacro[4]+","+newMacro[5]+","+newMacro[6]+","+newMacro[7]+","+newMacro[8]+"");
             Debug.WriteLine("Level " + level);
             Debug.WriteLine("");
         }

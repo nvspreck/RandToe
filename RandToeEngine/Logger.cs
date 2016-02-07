@@ -13,9 +13,9 @@ namespace RandToe
     /// </summary>
     public enum LogLevels
     {
-        Info,
-        Warn,
-        Error
+        Info = 0,
+        Warn = 1,
+        Error = 2
     };
 
     public delegate void OnLogMessageDelegate(LogLevels level, string formattedMessage);
@@ -35,7 +35,7 @@ namespace RandToe
         /// <param name="ex"></param>
         public void Log(object source, string message, Exception ex)
         {
-            Log(source, $"EXCP! ({message}) Exc Mes: ({ex.Message})", LogLevels.Error);
+            Log(source, "EXCP! ("+message+") Exc Mes: ("+ex.Message+")", LogLevels.Error);
         }
 
         /// <summary>
@@ -61,7 +61,8 @@ namespace RandToe
             }
 
             // Make the formatted string.
-            string formattedMessage = $"{DateTime.Now.Hour.ToString("D2")}:{DateTime.Now.Minute.ToString("D2")}:{DateTime.Now.Second.ToString("D2")}:{DateTime.Now.Millisecond.ToString("D3")} [{levelString}] ({source.GetType().Name}): {message}";
+            // todo enable
+            string formattedMessage = /*DateTime.Now.Hour.ToString("D2")+":"+DateTime.Now.Minute.ToString("D2")+":"+DateTime.Now.Second.ToString("D2")+":"+DateTime.Now.Millisecond.ToString("D3")+" ["+levelString+"] ("+source.GetType().Name+"): "+*/ message;
 
             // Send the log.
             if(OnLogMessage != null)

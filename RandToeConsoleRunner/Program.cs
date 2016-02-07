@@ -44,12 +44,12 @@ namespace RandToeConsoleRunner
 
 
             string botName = "RandBot";
-            PlayerBase.Logger.Log(this, $"Making bot: {botName}");
+            PlayerBase.Logger.Log(this, "Making bot: "+botName);
 
             // Make the bot
             IPlayer playingBot = BotManager.GetBot(botName);
 
-            PlayerBase.Logger.Log(this, $"Bot Made");
+            PlayerBase.Logger.Log(this, "Bot Made");
 
 
 
@@ -72,7 +72,7 @@ namespace RandToeConsoleRunner
                     // Read a new line.
                     string newCommand = consoleReader.ReadLine();
 
-                    PlayerBase.Logger.Log(this, $"Command Received: {newCommand}");
+                    PlayerBase.Logger.Log(this, "Command Received: "+newCommand);
 
                     // Send the command to the engine
                     engine.OnCommandRecieved(newCommand);
@@ -99,7 +99,7 @@ namespace RandToeConsoleRunner
             }
             else
             {
-                PlayerBase.Logger.Log(this, $"OnMakeMoveCommand was called but we didn't have an output!", LogLevels.Error);
+                PlayerBase.Logger.Log(this, "OnMakeMoveCommand was called but we didn't have an output!", LogLevels.Error);
             }
         }
 
@@ -109,8 +109,18 @@ namespace RandToeConsoleRunner
         {
             if (m_consoleError != null)
             {
-                // Fire off the message async.
-                m_consoleError.WriteLineAsync(formattedMessage);
+#if DEBUG
+                if(level >= LogLevels.Info)
+#else
+                if(level >= LogLevels.Info)
+#endif
+                {
+                    // Fire off the message async.
+                    // Todo change back
+                    // m_consoleError.WriteLineAsync(formattedMessage);
+                    // 
+                    m_consoleError.WriteLine(formattedMessage);
+                }
             }
         }
     }

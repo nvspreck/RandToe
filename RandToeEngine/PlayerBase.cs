@@ -28,6 +28,11 @@ namespace RandToe
         /// </summary>
         readonly IPlayer m_player;
 
+        /// <summary>
+        /// Used to hold the last board we know of so we can compute the last move.
+        /// </summary>
+        MacroBoard m_lastBoard = null;
+
 
         public PlayerBase(IMoveCommandConsumer moveConsumer, IPlayer player)
         {
@@ -72,7 +77,7 @@ namespace RandToe
             }
             else
             {
-                Logger.Log(this, $"An unkown command base has been sent! ({commandParts[0]})", LogLevels.Error);
+                Logger.Log(this, "An unknown command base has been sent! ("+commandParts[0]+")", LogLevels.Error);
             }
         }
 
@@ -85,7 +90,7 @@ namespace RandToe
         {
             if (commandParts.Length < 3)
             {
-                Logger.Log(this, $"Settings command is invalid, it has less than 3 parts!", LogLevels.Error);
+                Logger.Log(this, "Settings command is invalid, it has less than 3 parts!", LogLevels.Error);
                 return;
             }
 
@@ -93,14 +98,14 @@ namespace RandToe
             {
                 case "timebank":
                     int newTimebank;
-                    if(int.TryParse(commandParts[2], out newTimebank))
+                    if (int.TryParse(commandParts[2], out newTimebank))
                     {
                         Timebank = newTimebank;
-                        Logger.Log(this, $"Timebank updated ({Timebank})");
+                        Logger.Log(this, "Timebank updated (" + Timebank + ")");
                     }
                     else
                     {
-                        Logger.Log(this, $"Timebank command invalid ({commandParts[2]})", LogLevels.Error);
+                        Logger.Log(this, "Timebank command invalid (" + commandParts[2] + ")", LogLevels.Error);
                     }
                     break;
                 case "time_per_move":
@@ -108,40 +113,40 @@ namespace RandToe
                     if (int.TryParse(commandParts[2], out newTimePerMove))
                     {
                         TimeAddedPerMove = newTimePerMove;
-                        Logger.Log(this, $"TimeAddedPerMove updated ({TimeAddedPerMove})");
+                        Logger.Log(this, "TimeAddedPerMove updated (" + TimeAddedPerMove + ")");
 
                     }
                     else
                     {
-                        Logger.Log(this, $"time_per_move command invalid ({commandParts[2]})", LogLevels.Error);
+                        Logger.Log(this, "time_per_move command invalid (" + commandParts[2] + ")", LogLevels.Error);
                     }
                     break;
                 case "player_names":
                     // Get the original arg so the case is correct
                     string[] orgCmdParts = orgionalCommand.Split(' ');
                     Players = orgCmdParts[2].Split(',').ToList<string>();
-                    Logger.Log(this, $"Players updated ({Players.ToString()})");
+                    Logger.Log(this, "Players updated (" + Players.ToString() + ")");
                     break;
                 case "your_bot":
                     // Get the original arg so the case is correct
                     string[] orgCmdPartsBot = orgionalCommand.Split(' ');
                     PlayerName = orgCmdPartsBot[2];
-                    Logger.Log(this, $"PlayerName updated ({PlayerName})");
+                    Logger.Log(this, "PlayerName updated (" + PlayerName +")");
                     break;
                 case "your_botid":
                     sbyte botId;
                     if (sbyte.TryParse(commandParts[2], out botId))
                     {
                         PlayerId = botId;
-                        Logger.Log(this, $"PlayerId updated ({PlayerId})");
+                        Logger.Log(this, "PlayerId updated ("+PlayerId +")");
                     }
                     else
                     {
-                        Logger.Log(this, $"your_botid command invalid ({commandParts[2]})", LogLevels.Error);
+                        Logger.Log(this, "your_botid command invalid ("+commandParts[2]+")", LogLevels.Error);
                     }
                     break;
                 default:
-                    Logger.Log(this, $"An unkown settings command has been sent! ({commandParts[1]})", LogLevels.Error);
+                    Logger.Log(this, "An unknown settings command has been sent! ("+commandParts[1]+")", LogLevels.Error);
                     break;
             }
         }
@@ -155,12 +160,12 @@ namespace RandToe
             // Validate
             if(!commandParts[1].Equals("game"))
             {
-                Logger.Log(this, $"An unkown update command has been sent! ({commandParts[1]})", LogLevels.Error);
+                Logger.Log(this, "An unknown update command has been sent! ("+commandParts[1]+")", LogLevels.Error);
                 return;
             }
             if (commandParts.Length < 3)
             {
-                Logger.Log(this, $"Update command is invalid, it has less than 3 parts!", LogLevels.Error);
+                Logger.Log(this, "Update command is invalid, it has less than 3 parts!", LogLevels.Error);
                 return;
             }
 
@@ -171,11 +176,11 @@ namespace RandToe
                     if (int.TryParse(commandParts[3], out newRound))
                     {
                         CurrentRound = newRound;
-                        Logger.Log(this, $"CurrentRound updated ({CurrentRound})");
+                        Logger.Log(this, "CurrentRound updated ("+CurrentRound+")");
                     }
                     else
                     {
-                        Logger.Log(this, $"round command invalid ({commandParts[2]})", LogLevels.Error);
+                        Logger.Log(this, "round command invalid ("+commandParts[2]+")", LogLevels.Error);
                     }
                     break;
                 case "move":
@@ -183,11 +188,11 @@ namespace RandToe
                     if (int.TryParse(commandParts[3], out newMove))
                     {
                         CurrentMove = newMove;
-                        Logger.Log(this, $"CurrentMove updated ({CurrentMove})");
+                        Logger.Log(this, "CurrentMove updated ("+CurrentMove+")");
                     }
                     else
                     {
-                        Logger.Log(this, $"move command invalid ({commandParts[2]})", LogLevels.Error);
+                        Logger.Log(this,"move command invalid ("+commandParts[2]+")", LogLevels.Error);
                     }
                     break;
                 case "field":
@@ -207,7 +212,7 @@ namespace RandToe
                     }
                     break;
                 default:
-                    Logger.Log(this, $"An unkown update command has been sent! ({commandParts[2]})", LogLevels.Error);
+                    Logger.Log(this, "An unkown update command has been sent! ("+commandParts[2]+")", LogLevels.Error);
                     break;
             }
         }
@@ -228,7 +233,7 @@ namespace RandToe
             {
                 if (!sbyte.TryParse(fieldStringArray[count], out intArray[count]))
                 {
-                    Logger.Log(this, $"Failed to parse int array pos:({count}) string:({intArrayString})", LogLevels.Error);
+                    Logger.Log(this, "Failed to parse int array pos:("+count+") string:("+intArrayString+")", LogLevels.Error);
                 }
                 count++;
             }
@@ -236,7 +241,7 @@ namespace RandToe
             // Validate
             if (count != expectedCount)
             {
-                Logger.Log(this, $"Int array didn't contain {expectedCount} elements!", LogLevels.Error);
+                Logger.Log(this, "Int array didn't contain "+expectedCount+" elements!", LogLevels.Error);
                 return null;
             }
 
@@ -256,35 +261,60 @@ namespace RandToe
                 // Check that the board is old.
                 if(CurrentBoard != null && CurrentBoard.Round == CurrentRound)
                 {
-                    Logger.Log(this, $"We are creating a new board with a new field value but the round is the same! Round:({CurrentRound})", LogLevels.Warn);
+                    // Set the field array
+                    MacroBoard.AddFieldData(CurrentBoard, fieldArray);
+
+                    // If the last board hasn't been looked at yet.
+                    if(m_lastBoard != null && m_lastBoard.Round != CurrentRound)
+                    {
+                        // Find what move they made, and add it to the list.
+                        FindOpponentMove(m_lastBoard, CurrentBoard);
+                        m_lastBoard = null;
+                    }
+
+                    // Special case, if the round is 1 call it anyways to find what move the other player stared with
+                    else if(CurrentRound == 1)
+                    {
+                        FindOpponentMove(m_lastBoard, CurrentBoard);
+                    }
                 }
+                else
+                {
+                    // Capture the last board
+                    m_lastBoard = CurrentBoard;
 
-                // Capture the last board
-                MacroBoard lastBoard = CurrentBoard;
+                    // Make a new board
+                    CurrentBoard = MacroBoard.CreateNewBoard(CurrentRound);
 
-                // Make a new board
-                CurrentBoard = MacroBoard.CreateNewBoard(CurrentRound, fieldArray);
+                    // Set the field array
+                    MacroBoard.AddFieldData(CurrentBoard, fieldArray);
 
-                // Find what move they made, and add it to the list.
-                FindOpponentMove(lastBoard, CurrentBoard);
+                    // Find what move they made, and add it to the list.
+                    FindOpponentMove(m_lastBoard, CurrentBoard);
+                    m_lastBoard = null;
+                }
             }
 
             // If we have a macro board set it.
             if(macroBoard != null)
             {
-                // Check that the board is old.
-                if (CurrentBoard != null && CurrentBoard.Round != CurrentRound)
+                // Check if we already have a board
+                if (CurrentBoard != null && CurrentBoard.Round == CurrentRound)
                 {
-                    Logger.Log(this, $"We are setting the macroboard on a board that is not the current round number! Current Round:({CurrentRound}); Board Round ({CurrentBoard.Round})", LogLevels.Error);
+                    // Set the values
+                    MacroBoard.AddMacroboardData(CurrentBoard, macroBoard);
                 }
-                if(CurrentBoard != null && CurrentBoard.HasAllData)
+                else
                 {
-                    Logger.Log(this, $"Macroboard data set on a board that already has all data", LogLevels.Error);
-                    return;
-                }
+                    // Capture the last board
+                    m_lastBoard = CurrentBoard;
 
-                // Set the values
-                MacroBoard.AddMacroboardData(CurrentBoard, macroBoard);
+                    // Make a new board
+                    CurrentBoard = MacroBoard.CreateNewBoard(CurrentRound);
+
+                    // Set the values
+                    MacroBoard.AddMacroboardData(CurrentBoard, macroBoard);
+                }
             }
         }
 
@@ -296,23 +326,23 @@ namespace RandToe
         {
             if(!commandParts[1].Equals("move"))
             {
-                Logger.Log(this, $"An unkown action command has been sent! ({commandParts[1]})", LogLevels.Error);
+                Logger.Log(this, "An unknown action command has been sent! (" + commandParts[1] +")", LogLevels.Error);
                 return;
             }
 
             // Validate
             if(CurrentBoard == null)
             {
-                Logger.Log(this, $"We were asked to make a move but we don't have a board!", LogLevels.Error);
+                Logger.Log(this, "We were asked to make a move but we don't have a board!", LogLevels.Error);
                 return;
             }
             if (CurrentBoard.Round != CurrentRound)
             {
-                Logger.Log(this, $"We were asked to make a move but the board is from an older round!", LogLevels.Error);
+                Logger.Log(this, "We were asked to make a move but the board is from an older round!", LogLevels.Error);
             }
             if (!CurrentBoard.HasAllData)
             {
-                Logger.Log(this, $"We were asked to make a move our board doesn't have all of the data!", LogLevels.Error);
+                Logger.Log(this, "We were asked to make a move our board doesn't have all of the data!", LogLevels.Error);
             }
 
             // Ask the player to make a move
@@ -322,7 +352,7 @@ namespace RandToe
             }
             catch(Exception ex)
             {
-                Logger.Log(this, $"Exception in IPlayer Move Requested!", ex);
+                Logger.Log(this, "Exception in IPlayer Move Requested!", ex);
             }
         }
 
@@ -390,14 +420,14 @@ namespace RandToe
             // Validate the move, make sure there isn't already a play here.
             if(CurrentBoard.Slots[move.MacroX][move.MacroY] != 0)
             {
-                Logger.Log(this, $"Make move has been called with an illegal move! The space is not empty", LogLevels.Error);
+                Logger.Log(this, "Make move has been called with an illegal move! The space is not empty", LogLevels.Error);
                 return false;
             }
 
             // Validate they are playing in a box that can be played in
             if(!CurrentBoard.GetMicroBoardForMacroCords(move.MacroX, move.MacroY).IsPlayable)
             {
-                Logger.Log(this, $"Make move has been called with an illegal move! The board is not playable!", LogLevels.Error);
+                Logger.Log(this, "Make move has been called with an illegal move! The board is not playable!", LogLevels.Error);
                 return false;
             }
 
@@ -405,7 +435,7 @@ namespace RandToe
             AddPlayerMoveToHistory(PlayerId, move);
 
             // Make the move
-            m_moveConsumer.OnMakeMoveCommand($"place_move {move.MacroX} {move.MacroY}");
+            m_moveConsumer.OnMakeMoveCommand("place_move "+move.MacroX+" "+move.MacroY);
 
             return true;
         }
@@ -449,7 +479,7 @@ namespace RandToe
                             // Make sure we only get one change.
                             if (foundChange)
                             {
-                                PlayerBase.Logger.Log(this, $"Move than one change has been found in the game board! Old value ({oldBoard.Slots[x][y]}) New Value ({newBoard.Slots[x][y]}) x({x}) y({y})", LogLevels.Error);
+                                PlayerBase.Logger.Log(this, "Move than one change has been found in the game board! Old value ("+oldBoard.Slots[x][y]+") New Value ("+newBoard.Slots[x][y]+") x("+x+") y("+y+")", LogLevels.Error);
                                 if (Debugger.IsAttached)
                                 {
                                     Debugger.Break();
@@ -461,7 +491,7 @@ namespace RandToe
                             sbyte diffValue = newBoard.Slots[x][y];
                             if (diffValue == 0 || diffValue == -1 || diffValue == PlayerId)
                             {
-                                PlayerBase.Logger.Log(this, $"The calculated difference between old and new boards is not the other player's move! Old value ({oldBoard.Slots[x][y]}) New Value ({newBoard.Slots[x][y]})", LogLevels.Error);
+                                PlayerBase.Logger.Log(this, "The calculated difference between old and new boards is not the other player's move! Old value ("+oldBoard.Slots[x][y]+") New Value ("+newBoard.Slots[x][y]+")", LogLevels.Error);
                                 if (Debugger.IsAttached)
                                 {
                                     Debugger.Break();
@@ -483,7 +513,7 @@ namespace RandToe
                             sbyte newValue = newBoard.Slots[x][y];
                             if(newValue == PlayerId)
                             {
-                                PlayerBase.Logger.Log(this, $"The first move wasn't us and yet it is our number!?!", LogLevels.Error);
+                                PlayerBase.Logger.Log(this, "The first move wasn't us and yet it is our number!?!", LogLevels.Error);
                                 if (Debugger.IsAttached)
                                 {
                                     Debugger.Break();

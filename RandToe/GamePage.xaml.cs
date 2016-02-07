@@ -76,8 +76,9 @@ namespace RandToe
 
             m_currentTurn.OnCommandRecieved(round1);
             m_currentTurn.OnCommandRecieved(updatemove1);
-            m_currentTurn.OnCommandRecieved(gamefield1);
             m_currentTurn.OnCommandRecieved(macroboard1);
+            m_currentTurn.OnCommandRecieved(gamefield1);
+
             m_currentTurn.OnCommandRecieved(move);
         }
 
@@ -188,7 +189,8 @@ namespace RandToe
                 intArray[i] = 0;
             }
 
-            m_board = MacroBoard.CreateNewBoard(1,intArray);
+            m_board = MacroBoard.CreateNewBoard(1);
+            MacroBoard.AddFieldData(m_board, intArray);
             sbyte[] macroBoard = { -1, -1, -1, -1, -1, -1, -1, -1, -1};
             MacroBoard.AddMacroboardData(m_board, macroBoard);
 

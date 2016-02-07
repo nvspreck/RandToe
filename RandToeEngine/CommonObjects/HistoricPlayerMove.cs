@@ -10,15 +10,18 @@ namespace RandToe
     {
         public HistoricPlayerMove(int playerId, PlayerMove move)
         {
-            PlayerId = playerId;
-            MacroX = move.MacroX;
-            MacroY = move.MacroY;
+            m_playerId = playerId;
+            m_macroX = move.MacroX;
+            m_macroY = move.MacroY;
         }
 
-        public int MacroX { get; }
+        public int MacroX { get { return m_macroX; } }
+        private int m_macroX = 0;
 
-        public int MacroY { get; }
+        public int MacroY { get { return m_macroY; } }
+        private int m_macroY = 0;
 
-        public int PlayerId { get; }
+        public int PlayerId { get { return m_playerId; } }
+        private int m_playerId = 0;
     }
 }
