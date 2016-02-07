@@ -41,9 +41,7 @@ namespace RandToeConsoleRunner
             // Sub to the logger
             PlayerBase.Logger.OnLogMessage += Logger_OnLogMessage;
 
-
-
-            string botName = "RandBot";
+            string botName = "ThinkDeep";
             PlayerBase.Logger.Log(this, "Making bot: "+botName);
 
             // Make the bot
@@ -51,16 +49,12 @@ namespace RandToeConsoleRunner
 
             PlayerBase.Logger.Log(this, "Bot Made");
 
-
-
             PlayerBase.Logger.Log(this, "Creating Engine");
 
             // Make the engine.
             PlayerBase engine = new PlayerBase(this, playingBot);
 
             PlayerBase.Logger.Log(this, "Engine Created; Entering main loop");
-
-
 
             // The main loop
             while(true)
@@ -112,7 +106,7 @@ namespace RandToeConsoleRunner
 #if DEBUG
                 if(level >= LogLevels.Info)
 #else
-                if(level >= LogLevels.Info)
+                if(level >= LogLevels.Error)
 #endif
                 {
                     // Fire off the message async.

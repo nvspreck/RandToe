@@ -26,7 +26,7 @@ namespace RandToe
         /// <summary>
         /// Indicates if the board is ready for consumption.
         /// </summary>
-        public bool HasAllData { get; private set; } = false;
+        public bool HasAllData { get; private set; }
 
         /// <summary>
         /// The micro boards that represent this game board.

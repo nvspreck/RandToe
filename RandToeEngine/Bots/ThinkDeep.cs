@@ -50,18 +50,27 @@ namespace RandToe
 
             // Grab the time
             m_numberOfMovesChecked = 0;
-            DateTime startTime = DateTime.Now;            
+
+#if DEBUG
+            DateTime startTime = DateTime.Now;
+#endif          
 
             // Find the move.
             sbyte[][] slots = playerBase.CurrentBoard.Slots;
             // Todo restore depth when I can thread.
             PlayerMove move = ComputeMove(ref slots, playerBase.CurrentBoard.MacroBoardStates, 4);
 
+#if DEBUG
             // Grab the end time
             TimeSpan diff = DateTime.Now - startTime;
+#endif
 
+#if DEBUG
             // Compute time per move.
             double timePerValue = diff.TotalMilliseconds / m_numberOfMovesChecked;
+#else
+            double timePerValue = 0;
+#endif
 
             // Update the average
             if (m_averageTimePerMove == 0)
@@ -73,13 +82,18 @@ namespace RandToe
                 m_averageTimePerMove = (m_averageTimePerMove * .90) + (timePerValue * .10);
             }
 
+#if DEBUG
+            // Compute time per move.
             PlayerBase.Logger.Log(this, "Total move calcuation done; time ("+diff.TotalMilliseconds+"ms), computed values ("+m_numberOfMovesChecked+"), time per value ("+timePerValue+"), new average("+m_averageTimePerMove+")");
+#else
+            PlayerBase.Logger.Log(this, "Total move calcuation done; time (0ms), computed values (" + m_numberOfMovesChecked + "), time per value (" + timePerValue + "), new average(" + m_averageTimePerMove + ")");
+#endif
 
             // Make the move
             playerBase.MakeMove(move);
         }
 
-        #region Depth First
+#region Depth First
 
         private PlayerMove ComputeMove(ref sbyte[][] slots, sbyte[] macroboard, int maxDepth)
         {
@@ -133,20 +147,25 @@ namespace RandToe
                                 {
                                     // Setup up
                                     int moveScore = 0;
+#if DEBUG
                                     DateTime begin = DateTime.Now;
+#endif
 
                                     // Do the move logic.
-                                    DoMoveLogic(ref localSlots, ref localMacroblockState, ref moveScore, localX, localY, localMacroBlockCount, true, 0, maxDepth);            
+                                    DoMoveLogic(ref localSlots, ref localMacroblockState, ref moveScore, localX, localY, localMacroBlockCount, true, 0, maxDepth);
 
+#if DEBUG
                                     // Get the time now.
                                     DateTime end = DateTime.Now;
-                                    TimeSpan diff = end - begin;                     
-
+                                    TimeSpan diff = end - begin; 
+                                    
                                     // Log
                                     PlayerBase.Logger.Log(this, "Move ("+localX+","+localY+")["+localMacroX+","+localMacroY+"] Computed; Score ("+moveScore+"), Time ("+diff.TotalMilliseconds+"ms)");
 
+#endif
+
                                     // If this is equal to the current top score pick at random.
-                                    lock(bestMoves)
+                                    lock (bestMoves)
                                     {
                                         if (moveScore == bestScore)
                                         {
@@ -563,9 +582,9 @@ namespace RandToe
             return false;
         }
 
-        #endregion
+#endregion
 
-        #region Breadth first
+#region Breadth first
 
         private class BreadthNode
         {
@@ -711,7 +730,7 @@ namespace RandToe
                 // If we didn't find a center, pick one at random
                 if (selectedMove == null)
                 {
-                    Random rand = new Random((int)DateTime.Now.Ticks);
+                    Random rand = new Random();
                     selectedMove = bestMoves[rand.Next(0, bestMoves.Count)];
                 }
             }
@@ -858,7 +877,7 @@ namespace RandToe
             }
         }
 
-        #endregion
+#endregion
 
         private void PrintBoardState(ref sbyte[][] slots, sbyte[] newMacro, int level)
         {

@@ -23,7 +23,7 @@ namespace RandToe
             List<PlayerMove> possibleMoves = playerBase.CurrentBoard.GetAllPossibleMoves();
 
             // Make random
-            Random rand = new Random((int)DateTime.Now.Ticks);
+            Random rand = new Random();
 
             // Select a move
             PlayerMove selectedMove = possibleMoves[rand.Next(0, possibleMoves.Count)];
