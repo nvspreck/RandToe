@@ -142,8 +142,11 @@ namespace RandToe
                                 // Put the work in a task to be executed.
                                 numberOfTasks++;
 
-                                // Todo enable threading.
-                                //Task.Run(() =>
+#if TARGET_FRAMEWORK45
+                                Task.Run(() =>
+#else
+                                ThreadPool.QueueUserWorkItem((object context) =>
+#endif
                                 {
                                     // Setup up
                                     int moveScore = 0;
@@ -157,10 +160,10 @@ namespace RandToe
 #if DEBUG
                                     // Get the time now.
                                     DateTime end = DateTime.Now;
-                                    TimeSpan diff = end - begin; 
-                                    
+                                    TimeSpan diff = end - begin;
+
                                     // Log
-                                    PlayerBase.Logger.Log(this, "Move ("+localX+","+localY+")["+localMacroX+","+localMacroY+"] Computed; Score ("+moveScore+"), Time ("+diff.TotalMilliseconds+"ms)");
+                                    PlayerBase.Logger.Log(this, "Move (" + localX + "," + localY + ")[" + localMacroX + "," + localMacroY + "] Computed; Score (" + moveScore + "), Time (" + diff.TotalMilliseconds + "ms)");
 
 #endif
 
@@ -184,7 +187,11 @@ namespace RandToe
                                         numberOfTasksDone++;
                                         doneEvent.Set();
                                     }
-                                }//);
+#if TARGET_FRAMEWORK45
+                                });
+#else
+                                }, null);
+#endif
                             }
                         }
                     }
